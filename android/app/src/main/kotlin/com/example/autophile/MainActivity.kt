@@ -1,0 +1,5 @@
+package com.example.autophile
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity: FlutterActivity()
