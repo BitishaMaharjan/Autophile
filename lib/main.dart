@@ -2,6 +2,7 @@ import 'package:autophile/screens/SplashWrapper.dart';
 import 'package:autophile/screens/landing_page.dart';
 import 'package:autophile/screens/login_page.dart';
 import 'package:autophile/screens/settings_page.dart';
+import 'package:autophile/screens/signup_page.dart';
 import 'package:autophile/themes/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -24,7 +25,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Autophile',
       theme: Provider.of<ThemeProvider>(context).themeData,
-      home: const Login_Page(),
+      home: const SignupPage(),
       debugShowCheckedModeBanner: false,
     );
   }

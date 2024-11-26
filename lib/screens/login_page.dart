@@ -1,3 +1,4 @@
+import 'package:autophile/screens/signup_page.dart';
 import 'package:autophile/widgets/app_button.dart';
 import 'package:flutter/material.dart';
 
@@ -22,11 +23,16 @@ class _Login_PageState extends State<Login_Page> {
         child: Material(
           color:Theme.of(context).colorScheme.surface,
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.only(
+              top:48,
+              right: 20,
+              left: 20,
+              bottom: 44,
+
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 48),
 
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -202,6 +208,8 @@ class _Login_PageState extends State<Login_Page> {
                     ),
                     GestureDetector(
                       onTap: (){
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context)=> SignupPage()),);
 
                       },
                       child: Text("Sign up",
