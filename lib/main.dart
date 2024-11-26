@@ -13,11 +13,12 @@ void main() {
   ),
   );
 }
+void _onCameraTapped() {
+  print("Camera tapped!");
+  // Add camera logic here
+}
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -25,6 +26,11 @@ class MyApp extends StatelessWidget {
       theme: Provider.of<ThemeProvider>(context).themeData,
       home: const SplashWrapper(),
       debugShowCheckedModeBanner: false,
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
+        onCameraTapped: _onCameraTapped,
+      ),
     );
   }
 }
