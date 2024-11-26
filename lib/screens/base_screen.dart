@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:autophile/widgets/BottomNavBar.dart';
+import 'package:autophile/widgets/custom_bottom_navbar.dart';
 
 class BaseScreen extends StatefulWidget {
   final VoidCallback onCameraTapped;
