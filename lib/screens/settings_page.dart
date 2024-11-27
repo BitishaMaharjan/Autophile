@@ -37,7 +37,7 @@ class SettingsPage extends StatelessWidget {
           SizedBox(height: 30,),
           AppButton(text: 'test', onTap: (){}),
           SizedBox(height: 30,),
-          AppButton(text: 'Next', onTap: (){})
+          AppButton(text: 'Next', onTap: (){}),
         ],
       ),
     );

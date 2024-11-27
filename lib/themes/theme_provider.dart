@@ -1,4 +1,4 @@
-import 'package:autophile/themes/dart_mode.dart';
+import 'package:autophile/themes/dark_mode.dart';
 import 'package:autophile/themes/light_mode.dart';
 import 'package:flutter/material.dart';
 
