@@ -1,4 +1,5 @@
 import 'package:autophile/screens/SplashWrapper.dart';
+import 'package:autophile/screens/forgot_password.dart';
 import 'package:autophile/screens/landing_page.dart';
 import 'package:autophile/screens/reset_password.dart';
 import 'package:autophile/screens/settings_page.dart';
@@ -30,14 +31,8 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Autophile',
           theme: themeProvider.themeData,
-          home: const LandingPage(),
+          home: const ForgotPassword(),
           debugShowCheckedModeBanner: false,
-          initialRoute: '/home',
-          routes: {
-            '/home': (context) => BaseScreen(onCameraTapped: _onCameraTapped),
-            '/landing': (context) => LandingPage(),
-
-          },
         );
       },
     );
