@@ -1,3 +1,4 @@
+import 'package:autophile/screens/landing_page.dart';
 import 'package:autophile/screens/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -20,7 +21,6 @@ class _SplashWrapperState extends State<SplashWrapper> {
   }
 
   void _startLoading() {
-    // Simulate a delay for the splash screen
     Timer(const Duration(seconds: 4), () {
       setState(() {
         _isLoading = false;
@@ -32,11 +32,10 @@ class _SplashWrapperState extends State<SplashWrapper> {
   Widget build(BuildContext context) {
     return _isLoading
         ? const SplashScreen()
-        : const SettingsPage(); // Navigate to your main page
+        : const LandingPage();
   }
 }
 
-// SplashScreen implementation
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
