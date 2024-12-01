@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:autophile/widgets/custom_bottom_navbar.dart';
-import 'package:autophile/screens/Notification.dart';
-import 'package:autophile/themes/light_mode.dart';
+import 'package:autophile/screens/search_page.dart';
+
 
 class BaseScreen extends StatefulWidget {
   final VoidCallback onCameraTapped;
@@ -23,10 +23,7 @@ class _BaseScreenState extends State<BaseScreen> {
       ),
     ),
     Center(
-      child: Text(
-        "Search Screen",
-        style: TextStyle(fontSize: 24, color: Colors.black),
-      ),
+      child: SearchPage(),
     ),
     Center(
       child: NotificationPage(),
