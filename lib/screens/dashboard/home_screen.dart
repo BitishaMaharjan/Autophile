@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../widgets/carousel_widget.dart';
-import '../widgets/post_list_widget.dart';
+import 'package:autophile/widgets/home_screen/post_list_widget.dart';
+import 'package:autophile/widgets/home_screen/carousel_widget.dart';
+
 class HomeScreen extends StatelessWidget {
   // Dummy data for the carousel items
   final List<Map<String, String>> carouselItems = [

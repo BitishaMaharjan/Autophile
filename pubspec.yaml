@@ -67,6 +67,7 @@ flutter:
   assets:
     - assets/animation/
     - assets/images/
+    - assets/icons/
     - assets/images/social_icons/
     - assets/images/autophile_logo/
     - assets/models/

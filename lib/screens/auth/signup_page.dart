@@ -1,4 +1,4 @@
-import 'package:autophile/screens/login_page.dart';
+import 'package:autophile/screens/auth/login_page.dart';
 import 'package:autophile/widgets/app_button.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';

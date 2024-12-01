@@ -1,4 +1,4 @@
-import 'package:autophile/screens/signup_page.dart';
+import 'package:autophile/screens/auth/signup_page.dart';
 import 'package:autophile/widgets/app_button.dart';
 import 'package:flutter/material.dart';
 

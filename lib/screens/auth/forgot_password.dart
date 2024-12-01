@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/app_button.dart';
-import '../widgets/app_textfield.dart';
+import 'package:autophile/widgets/app_button.dart';
+import 'package:autophile/widgets/app_textfield.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({super.key});

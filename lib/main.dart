@@ -1,7 +1,7 @@
-import 'package:autophile/screens/camera_page.dart';
-import 'package:autophile/screens/landing_page.dart';
+import 'package:autophile/screens/camera_scan/camera_page.dart';
+import 'package:autophile/screens/onboarding/landing_page.dart';
 import 'package:flutter/material.dart';
-import 'package:autophile/screens/base_screen.dart';
+import 'package:autophile/screens/Dashboard/base_screen.dart';
 import 'package:autophile/themes/theme_provider.dart';
 import 'package:provider/provider.dart';
 
