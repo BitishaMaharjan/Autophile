@@ -62,7 +62,7 @@ class _LandingPageState extends State<LandingPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SizedBox(height: 300),
-                  AppButton(text: 'Sign in', onTap: (){}),
+                  AppButton(text: 'Sign in', onTap: (){Navigator.pushNamed(context, '/login');}),
                   SizedBox(height: 20),
                   GestureDetector(
                     onTap: () {},

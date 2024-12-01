@@ -60,7 +60,7 @@ class _BaseScreenState extends State<BaseScreen> {
         onItemTapped: _onItemTapped,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: widget.onCameraTapped,
+        onPressed: (){ Navigator.pushNamed(context, '/camera');},
         backgroundColor: Colors.lightBlue,
         shape: const CircleBorder(), // Ensures the FAB is completely circular
         child: const Icon(Icons.camera_alt, color: Colors.white),

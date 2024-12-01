@@ -1,5 +1,6 @@
 import 'package:autophile/screens/auth/signup_page.dart';
 import 'package:autophile/widgets/app_button.dart';
+import 'package:autophile/screens/dashboard/base_screen.dart';
 import 'package:flutter/material.dart';
 
 class Login_Page extends StatefulWidget {
@@ -134,7 +135,19 @@ class _Login_PageState extends State<Login_Page> {
                   )),
                 ),
                 SizedBox(height: 35,),
-                AppButton(text: "Sign in", onTap: (){}),
+                AppButton(text: "Sign in", onTap: () {
+                  // Perform sign-in logic here (e.g., validation/authentication)
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BaseScreen(
+                        onCameraTapped: () {
+                          // Camera functionality
+                        },
+                      ),
+                    ),
+                  );
+                },),
                 SizedBox(height: 28,),
                 Row(
                   children: [
