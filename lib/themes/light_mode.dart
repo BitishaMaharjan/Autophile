@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 ThemeData lightMode = ThemeData(
     colorScheme: ColorScheme.light(
@@ -7,5 +8,8 @@ ThemeData lightMode = ThemeData(
       secondary: Colors.black.withOpacity(0.2),
       tertiary: Colors.white,
       inversePrimary: Color(0xFF0F1419),
+      ),
+      textTheme: TextTheme(
+            bodyMedium: GoogleFonts.poppins()
       )
 );
