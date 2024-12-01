@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:autophile/widgets/custom_bottom_navbar.dart';
 import 'package:autophile/screens/search_page.dart';
 
+
 class BaseScreen extends StatefulWidget {
   final VoidCallback onCameraTapped;
 
@@ -16,7 +17,7 @@ class _BaseScreenState extends State<BaseScreen> {
 
   final List<Widget> _screens = [
     Center(
-      child: Text(
+      child:Text(
         "Home Screen",
         style: TextStyle(fontSize: 24, color: Colors.black),
       ),
@@ -25,10 +26,7 @@ class _BaseScreenState extends State<BaseScreen> {
       child: SearchPage(),
     ),
     Center(
-      child: Text(
-        "Notification Screen",
-        style: TextStyle(fontSize: 24, color: Colors.black),
-      ),
+      child: NotificationPage(),
     ),
     Center(
       child: Text(
@@ -47,9 +45,16 @@ class _BaseScreenState extends State<BaseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
+      backgroundColor:  Theme.of(context).colorScheme.surface, // Set the background color here
+      body: SafeArea(
+        // Ensures content starts below the status bar
+        child: Padding(
+          padding: const EdgeInsets.only(top: 5.0), // Adds extra spacing at the top
+          child: IndexedStack(
+            index: _selectedIndex,
+            children: _screens,
+          ),
+        ),
       ),
       bottomNavigationBar: CustomBottomNavBar(
         currentIndex: _selectedIndex,
@@ -64,5 +69,4 @@ class _BaseScreenState extends State<BaseScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked, // Keeps FAB centered
     );
   }
-
 }
