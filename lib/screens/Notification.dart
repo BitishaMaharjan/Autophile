@@ -86,7 +86,119 @@ class _NotificationPageState extends State<NotificationPage> {
               notificationIcon = Icon(Icons.notifications, color: Colors.grey);
           }
 
+          return Dismissible(
+            key: Key(notification["title"] ?? ""),
+            onDismissed: (direction) {
+              // Save the notification that is being removed
+              final removedNotification = notifications[index];
 
+              // Remove the notification from the list
+              setState(() {
+                notifications.removeAt(index);
+              });
+
+              // Show the SnackBar with an undo action
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(" ${removedNotification['title']} is removed!"),
+                  behavior: SnackBarBehavior.floating, // Make the snack bar float
+                  margin: EdgeInsets.fromLTRB(20, 50, 20, 20), // Ensure the snack bar doesn't go out of bounds
+                  action: SnackBarAction(
+                    label: 'UNDO',
+                    onPressed: () {
+                      // Restore the notification back to the list
+                      setState(() {
+                        notifications.insert(index, removedNotification);
+                      });
+                    },
+                    textColor: Colors.white, // Set the undo button text color to white
+                  ),
+                  backgroundColor: Colors.black,
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            },
+
+
+            background: Container(
+              color: Colors.red,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 20),
+                  child: Icon(Icons.delete, color: Colors.white),
+                ),
+              ),
+            ),
+            secondaryBackground: Container(
+              color: Colors.red,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: EdgeInsets.only(right: 20),
+                  child: Icon(Icons.delete, color: Colors.white),
+                ),
+              ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 20),
+              child: Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                color: notificationColor,
+                child: ListTile(
+                  contentPadding: EdgeInsets.all(14),
+                  title: Row(
+                    children: [
+                      notificationIcon,
+                      SizedBox(width: 18),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    notification["title"] ?? "",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: notification["isRead"]
+                                          ? Colors.black
+                                          : Colors.blue,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  notification["time"] ?? "",
+                                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 6),
+                            Text(
+                              notification["description"] ?? "",
+                              style: TextStyle(fontSize: 14, color: Colors.black),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  onTap: () => _toggleReadStatus(index),
+                ),
+              ),
+            ),
+          );
         },
       ),
     );
