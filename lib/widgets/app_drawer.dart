@@ -1,4 +1,4 @@
-import 'package:autophile/screens/settings_page.dart';
+import 'package:autophile/screens/dashboard/settings_page.dart';
 import 'package:autophile/widgets/app_drawer_tile.dart';
 import 'package:flutter/material.dart';
 

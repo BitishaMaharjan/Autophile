@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:autophile/widgets/custom_bottom_navbar.dart';
-import 'package:autophile/screens/search_page.dart';
+import 'package:autophile/screens/dashboard/home_screen.dart';
+import 'package:autophile/screens/dashboard/search_page.dart';
+import 'package:autophile/screens/dashboard/Notification.dart';
 
 
 class BaseScreen extends StatefulWidget {
@@ -17,10 +19,7 @@ class _BaseScreenState extends State<BaseScreen> {
 
   final List<Widget> _screens = [
     Center(
-      child:Text(
-        "Home Screen",
-        style: TextStyle(fontSize: 24, color: Colors.black),
-      ),
+      child: HomeScreen(),
     ),
     Center(
       child: SearchPage(),
@@ -61,7 +60,7 @@ class _BaseScreenState extends State<BaseScreen> {
         onItemTapped: _onItemTapped,
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: widget.onCameraTapped,
+        onPressed: (){ Navigator.pushNamed(context, '/camera');},
         backgroundColor: Colors.lightBlue,
         shape: const CircleBorder(), // Ensures the FAB is completely circular
         child: const Icon(Icons.camera_alt, color: Colors.white),

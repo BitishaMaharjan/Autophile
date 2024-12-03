@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:autophile/widgets/car_brand_section.dart';
-import 'package:autophile/widgets/featured_car_list.dart';
-import 'package:autophile/widgets/trending_news_list.dart';
-import 'package:autophile/widgets/search_bar.dart';
-import 'package:autophile/widgets/mic_modal.dart';
+import 'package:autophile/widgets/search_screen/featured_car_list.dart';
+import 'package:autophile/widgets/search_screen/trending_news_list.dart';
+import 'package:autophile/widgets/search_screen/search_bar.dart';
+import 'package:autophile/widgets/search_screen/mic_modal.dart';
+import 'package:autophile/widgets/search_screen/car_brand_section.dart';
 
 class SearchPage extends StatefulWidget {
   @override

@@ -40,6 +40,7 @@ dependencies:
   google_fonts: ^6.2.1
   camerawesome: ^2.1.0
   o3d: ^3.1.0
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +68,7 @@ flutter:
   assets:
     - assets/animation/
     - assets/images/
+    - assets/icons/
     - assets/images/social_icons/
     - assets/images/autophile_logo/
     - assets/models/
