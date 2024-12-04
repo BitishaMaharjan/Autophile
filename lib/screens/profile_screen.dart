@@ -1,3 +1,4 @@
+import 'package:autophile/widgets/home_screen/post_list_widget.dart';
 import 'package:autophile/widgets/profile_header.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +11,28 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   bool showMyPosts=true;
+  final List<Map<String, String>> posts = [
+    {
+      'user': 'Car Guy',
+      'location': 'Monaco, India',
+      'content': 'How much will this cost on average?',
+      'image':
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSO1q5iuu6wJJpVVV5U4Gr_SvpPwdiiYzXGcg&s',
+      'likes': '110',
+      'comments': '3',
+      'shares': '45',
+    },
+    {
+      'user': 'Tech Enthusiast',
+      'location': 'Silicon Valley, USA',
+      'content': 'What is the latest trend in AI technology?',
+      'image':
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcUoJOCMikZl8T5BA16Uqfl-GGcxemCvfbCw&s',
+      'likes': '150',
+      'comments': '5',
+      'shares': '60',
+    },
+  ];
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -28,8 +51,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Padding(
                   padding: EdgeInsets.only(
                     top:21,
-                    right: 74,
-                    left: 74
+                    right: 20,
+                    left: 20,
 
                   ),
                   child: Column(
@@ -85,7 +108,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         thickness: 1,
                       ),
                       const SizedBox(height: 14,),
-
+                      showMyPosts
+                          ? PostListWidget(posts:posts) // My Posts
+                          : Container(
+                        height: 200,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            "Saved Photos will appear here",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
