@@ -2,6 +2,8 @@ import 'package:autophile/widgets/home_screen/post_list_widget.dart';
 import 'package:autophile/widgets/profile_header.dart';
 import 'package:flutter/material.dart';
 
+import '../widgets/saved_photos.dart';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -33,6 +35,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'shares': '60',
     },
   ];
+  final List<Map<String, String>> savedPhotos = [
+    {
+      'image':
+      'assets/images/savedcar1.png',
+      'name': 'Volkswagen Polo',
+    },
+    {
+      'image':
+      'assets/images/savedcar1.png',
+      'name': 'Tesla Model X',
+    },
+    {
+      'image':
+      'assets/images/savedcar1.png',
+      'name': 'Mercedes G-Wagon',
+    },
+    {
+      'image':
+      'assets/images/savedcar1.png',
+      'name': 'BMW X5',
+    },
+  ];
+
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -109,24 +135,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 14,),
                       showMyPosts
-                          ? PostListWidget(posts:posts) // My Posts
-                          : Container(
-                        height: 200,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            "Saved Photos will appear here",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
+                          ? PostListWidget(posts: posts) // My Posts
+                          : SavedPhotosWidget(savedPhotos: savedPhotos),
+
+
+
                     ],
                   ),
                 ),
