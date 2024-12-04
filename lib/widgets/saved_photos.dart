@@ -10,15 +10,18 @@ class SavedPhotosWidget extends StatelessWidget {
     final crossAxisCount = screenWidth > 600 ? 3 : 2; // Adjust grid columns for larger screens
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.only(
+        right: 20,
+        left: 20,
+      ),
       child: GridView.builder(
         shrinkWrap: true, // Allows grid to fit within a scrollable layout
         physics: NeverScrollableScrollPhysics(), // Prevents internal scrolling
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount, // Number of columns
-          crossAxisSpacing: 14.0, // Space between columns
-          mainAxisSpacing: 20.0, // Space between rows
-          childAspectRatio: 0.8, // Adjust item height-to-width ratio
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 14.0,
+          mainAxisSpacing: 20.0,
+          childAspectRatio: 1.3,
         ),
         itemCount: savedPhotos.length,
         itemBuilder: (context, index) {

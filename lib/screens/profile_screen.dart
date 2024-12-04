@@ -43,12 +43,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     },
     {
       'image':
-      'assets/images/savedcar1.png',
+      'assets/images/savedcar2.png',
       'name': 'Tesla Model X',
     },
     {
       'image':
-      'assets/images/savedcar1.png',
+      'assets/images/savedcar3.png',
       'name': 'Mercedes G-Wagon',
     },
     {
@@ -56,6 +56,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       'assets/images/savedcar1.png',
       'name': 'BMW X5',
     },
+    {
+      'image':
+      'assets/images/savedcar2.png',
+      'name': 'BMW X5',
+    },
+    {
+      'image':
+      'assets/images/savedcar3.png',
+      'name': 'BMW X5',
+    },
+
   ];
 
 
@@ -121,7 +132,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
-                                color: Theme.of(context).colorScheme.secondary,
+                                color: !showMyPosts
+                                    ? Theme.of(context).colorScheme.secondary
+                                    : Theme.of(context).colorScheme.onPrimary, // Inactive color
                               ),
 
                             ),
