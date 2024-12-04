@@ -1,3 +1,4 @@
+import 'package:autophile/screens/auth/signup_page.dart';
 import 'package:autophile/widgets/app_button.dart';
 import 'package:flutter/material.dart';
 
@@ -31,12 +32,15 @@ class _LandingPageState extends State<LandingPage> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+
       body: Stack(
         children: [
           Positioned.fill(
             child: Image.asset(
               'assets/images/landing_background.png',
               fit: BoxFit.contain,
+                color: Theme.of(context).colorScheme.surface
             ),
           ),
 
@@ -62,7 +66,7 @@ class _LandingPageState extends State<LandingPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SizedBox(height: 300),
-                  AppButton(text: 'Sign in', onTap: (){Navigator.pushNamed(context, '/login');}),
+                  AppButton(text: 'Sign in', onTap: (){Navigator.pushNamed(context, '/auth');}),
                   SizedBox(height: 20),
                   GestureDetector(
                     onTap: () {},
@@ -113,7 +117,9 @@ class _LandingPageState extends State<LandingPage> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: (){},
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>SignupPage()));
+                        },
                         child:
                         Text('Sign up',
                           style: TextStyle(

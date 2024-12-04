@@ -52,6 +52,7 @@ class _PostListWidgetState extends State<PostListWidget> {
         int shares = int.tryParse(post['shares'] ?? '0') ?? 0;
 
         return Card(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

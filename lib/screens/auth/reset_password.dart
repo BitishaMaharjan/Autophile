@@ -1,3 +1,4 @@
+import 'package:autophile/screens/auth/login_page.dart';
 import 'package:autophile/widgets/app_button.dart';
 import 'package:autophile/widgets/app_textfield.dart';
 import 'package:flutter/material.dart';
@@ -75,7 +76,9 @@ class _ResetPasswordState extends State<ResetPassword> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: (){},
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>Login_Page()));
+                    },
                     child:
                     Text('Sign in',
                       style: TextStyle(

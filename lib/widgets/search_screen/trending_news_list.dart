@@ -60,6 +60,7 @@ class TrendingNewsList extends StatelessWidget {
     return Column(
       children: trendingCars.map((car) {
         return Card(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
           margin: const EdgeInsets.only(bottom: 15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
