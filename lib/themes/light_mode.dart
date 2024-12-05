@@ -12,6 +12,14 @@ ThemeData lightMode = ThemeData(
       inversePrimary: Color(0xFF0F1419),
       ),
       textTheme: TextTheme(
-            bodyMedium: GoogleFonts.poppins()
+            bodyLarge: GoogleFonts.poppins(
+                  color: Colors.black,
+            ),
+            bodyMedium: GoogleFonts.poppins(
+                  color: Colors.black,
+            ),
+            titleMedium: GoogleFonts.poppins(
+                  color: Colors.black,
+            ),
       )
 );

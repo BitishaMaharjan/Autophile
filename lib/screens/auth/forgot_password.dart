@@ -1,3 +1,4 @@
+import 'package:autophile/screens/auth/login_page.dart';
 import 'package:flutter/material.dart';
 
 import 'package:autophile/widgets/app_button.dart';
@@ -74,8 +75,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                         color: Theme.of(context).colorScheme.onPrimary
                     ),
                   ),
+                  SizedBox(width: 20,),
                   GestureDetector(
-                    onTap: (){},
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>Login_Page()));
+                    },
                     child:
                     Text('Sign in',
                       style: TextStyle(

@@ -67,7 +67,7 @@ class _NotificationPageState extends State<NotificationPage> {
         itemBuilder: (context, index) {
           final notification = notifications[index];
           Color notificationColor =
-          notification["isRead"] ? Colors.white : Colors.blue[50]!;
+          notification["isRead"] ? Theme.of(context).colorScheme.primary.withOpacity(0.7) : Colors.blue.shade50.withOpacity(0.4);
           Icon notificationIcon;
           switch (notification["type"]) {
             case "comment":
@@ -168,8 +168,8 @@ class _NotificationPageState extends State<NotificationPage> {
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                       color: notification["isRead"]
-                                          ? Colors.black
-                                          : Colors.blue,
+                                          ? Theme.of(context).colorScheme.inversePrimary
+                                          : Theme.of(context).colorScheme.secondary,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
@@ -185,7 +185,7 @@ class _NotificationPageState extends State<NotificationPage> {
                             SizedBox(height: 6),
                             Text(
                               notification["description"] ?? "",
-                              style: TextStyle(fontSize: 14, color: Colors.black),
+                              style: TextStyle(fontSize: 14),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),

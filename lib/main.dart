@@ -82,14 +82,13 @@ class MyApp extends StatelessWidget {
           title: 'Autophile',
           theme: themeProvider.themeData,
           debugShowCheckedModeBanner: false,
-          initialRoute: '/splash',
+          initialRoute: '/',
           routes: {
-            '/splash': (context) => const SplashWrapper(), // Splash screen route
-            '/login': (context) => const Login_Page(),   // Login screen route
+            '/': (context) => const SplashWrapper(), // Splash screen route
+            '/auth': (context) => const Login_Page(),   // Login screen route
             '/home': (context) => BaseScreen(onCameraTapped: _onCameraTapped), // Base screen route
             '/landing': (context) => LandingPage(),
             '/camera': (context) => CameraPage(),
-
           },
         );
       },
