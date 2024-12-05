@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:autophile/widgets/home_screen/carousel_widget.dart';
+import 'package:autophile/widgets/home_screen/home_floating_button.dart';
 import 'package:autophile/widgets/home_screen/post_list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -293,12 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showCreatePostPopup,
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.8),
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      floatingActionButton:HomeFloatingButton(onPressed: _showCreatePostPopup)
     );
   }
 }
