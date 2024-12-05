@@ -13,7 +13,7 @@ class CustomBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
-      color: Colors.white70,
+      color: Theme.of(context).colorScheme.primary,
       child: SizedBox(
         height: 60,
         child: Row(
