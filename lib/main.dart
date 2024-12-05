@@ -51,8 +51,14 @@ import 'package:autophile/screens/Dashboard/base_screen.dart';
 import 'package:autophile/screens/auth/login_page.dart'; // Import LoginPage
 import 'package:autophile/screens/onboarding/SplashWrapper.dart'; // Import SplashScreen
 import 'package:autophile/themes/theme_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async{
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(),
