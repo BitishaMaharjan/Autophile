@@ -52,7 +52,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
 
 
       body: SingleChildScrollView(
@@ -74,7 +74,7 @@ class HomeScreen extends StatelessWidget {
                     Material(
                       elevation: 3, // Adds shadow for elevation
                       borderRadius: BorderRadius.circular(12), // Rounded corners
-                      color: Colors.grey[200], // Background color
+                      color: Theme.of(context).colorScheme.primary, // Background color
                       child: Container(
                         padding: EdgeInsets.all(10), // Padding inside the container for the text
                         child: Text(

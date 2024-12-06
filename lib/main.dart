@@ -19,11 +19,22 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Autophile',
-      theme: Provider.of<ThemeProvider>(context).themeData,
-      home: const ProfileScreen(),
-      debugShowCheckedModeBanner: false,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          title: 'Autophile',
+          theme: themeProvider.themeData,
+          debugShowCheckedModeBanner: false,
+          initialRoute: '/',
+          routes: {
+            '/': (context) => const SplashWrapper(), // Splash screen route
+            '/auth': (context) => const Login_Page(),   // Login screen route
+            '/home': (context) => BaseScreen(onCameraTapped: _onCameraTapped), // Base screen route
+            '/landing': (context) => LandingPage(),
+            '/camera': (context) => CameraPage(),
+          },
+        );
+      },
     );
   }
 }

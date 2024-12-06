@@ -1,5 +1,6 @@
 import 'package:autophile/screens/auth/login_page.dart';
 import 'package:autophile/widgets/app_button.dart';
+import 'package:autophile/widgets/app_textfield.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -12,18 +13,21 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
-  bool _isEmailValid=false;
-  String _email='';
-  bool _isPasswordHidden=true;
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
+  // bool _isEmailValid=false;
+  // String _email='';
+  // bool _isPasswordHidden=true;
   bool _isChecked=false;
 
   final RegExp emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[cC][oO][mM]$');
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
-          child: Material(
-            color: Theme.of(context).colorScheme.surface,
+          child: SingleChildScrollView(
             child: Padding(
               padding:const EdgeInsets.only(
                 top:18,
@@ -54,106 +58,27 @@ class _SignupPageState extends State<SignupPage> {
                         ],
                       ),
                     SizedBox(height: 39,),
-                    Text("Email address",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                        ),),
-                    SizedBox(height: 6,),
-                      TextField(
-                        onChanged: (value){
-                          setState(() {
-                            _email=value;
-                            _isEmailValid=emailRegex.hasMatch(_email);
-                          });
-                        },
-                        decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(
-                                color: Color(0xffD8DADC),
-
-                              )
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                            ),
-                            borderRadius:BorderRadius.circular(10),
-                          ),
-                          suffixIcon: _isEmailValid ?Icon(
-                            Icons.check_circle,
-                          ):null,
-                        ),
-                      ),
-                    SizedBox(height: 17,),
-                    Text("Create a Password",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                      ),),
-                    SizedBox(height: 6,),
-                    TextField(
-                      obscureText: _isPasswordHidden,
-                      decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(
-                                color: Color(0xffD8DADC),
-
-                              )
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                            ),
-                            borderRadius:BorderRadius.circular(10),
-                          ),
-                          suffixIcon: IconButton(
-                            icon: Icon(_isPasswordHidden ? Icons.visibility_off: Icons.visibility,),
-                            onPressed: (){
-                              setState(() {
-                                _isPasswordHidden= !_isPasswordHidden;
-                              });
-                            },
-                          )
-                      ),
+                    AppTextField(
+                      controller: emailController,
+                      hintText: 'Enter your email',
+                      labelText: 'Email address',
                     ),
                     SizedBox(height: 17,),
-                    Text("Confirm Password",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                      ),),
-                    SizedBox(height: 6,),
-                    TextField(
-                      obscureText: _isPasswordHidden,
-                      decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(
-                                color: Color(0xffD8DADC),
-
-                              )
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.black,
-                            ),
-                            borderRadius:BorderRadius.circular(10),
-                          ),
-                          suffixIcon: IconButton(
-                            icon: Icon(_isPasswordHidden ? Icons.visibility_off: Icons.visibility,),
-                            onPressed: (){
-                              setState(() {
-                                _isPasswordHidden= !_isPasswordHidden;
-                              });
-                            },
-                          )
-                      ),
+                    AppTextField(
+                      controller: passwordController,
+                      hintText: 'must be 8 characters',
+                      labelText: 'Create a Password',
+                      obscureText: true,
+                    ),
+                    SizedBox(height: 17,),
+                    AppTextField(
+                      controller: confirmPasswordController,
+                      hintText: 'repeat your password',
+                      labelText: 'Confirm Password',
+                      obscureText: true,
                     ),
 
-                    SizedBox(height: 22,),
+                    SizedBox(height: 12,),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -166,7 +91,7 @@ class _SignupPageState extends State<SignupPage> {
                         Expanded(child: RichText(text: TextSpan(
                           text: "I have read and agreed to",
                           style: TextStyle(
-                            color: Colors.black,
+                            color: Theme.of(context).colorScheme.inversePrimary,
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
                           ),
@@ -174,7 +99,7 @@ class _SignupPageState extends State<SignupPage> {
                             TextSpan(
                               text: " User Agreement",
                               style: TextStyle(
-                                color: Colors.blue,
+                                color: Theme.of(context).colorScheme.secondary,
                                 fontWeight: FontWeight.w400,
 
                               ),
@@ -183,12 +108,10 @@ class _SignupPageState extends State<SignupPage> {
                                 _showPopup(context,"User Agreement","This is user agreement");
                                 }
                             ),
-                            TextSpan(text:" and ",
-                            style: TextStyle(color: Colors.black),
-                            ),
+                            TextSpan(text:" and "),
                             TextSpan(text: "Privacy Policy",
                             style: TextStyle(
-                              color: Colors.blue,
+                              color: Theme.of(context).colorScheme.secondary,
                               fontWeight: FontWeight.w400,
 
                             ),
@@ -201,7 +124,7 @@ class _SignupPageState extends State<SignupPage> {
                       ],
                     ),
 
-                    SizedBox(height: 22,),
+                    SizedBox(height: 12,),
                     AppButton(text: "Sign up", onTap: (){}),
                     SizedBox(height: 28,),
                     Row(
@@ -264,16 +187,16 @@ class _SignupPageState extends State<SignupPage> {
                         )
                       ],
                     ),
-                    SizedBox(height: 113,),
+                    SizedBox(height: 13,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text("Already have an account?",
                           style: TextStyle(
                             fontSize:17,
-                            color: Colors.black,
                             fontWeight: FontWeight.w400,),
                         ),
+                        SizedBox(width: 20,),
                         GestureDetector(
                           onTap: (){
                             Navigator.push(context,
@@ -283,7 +206,7 @@ class _SignupPageState extends State<SignupPage> {
                           child: Text("Sign in",
                             style: TextStyle(
                               fontSize: 17,
-                              color:Colors.blueGrey,
+                              color:Theme.of(context).colorScheme.secondary,
                               fontWeight: FontWeight.w400,
                             ),),
                         )

@@ -39,11 +39,11 @@ class _CarouselWidgetState extends State<CarouselWidget> {
                 return Container(
                   padding: EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
                     borderRadius: BorderRadius.circular(15),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.shade300,
+                        color: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.3),
                         blurRadius: 5,
                         spreadRadius: 2,
                       ),

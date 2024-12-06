@@ -1,3 +1,4 @@
+import 'package:autophile/screens/dashboard/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:autophile/widgets/custom_bottom_navbar.dart';
 import 'package:autophile/screens/dashboard/home_screen.dart';
@@ -28,9 +29,10 @@ class _BaseScreenState extends State<BaseScreen> {
       child: NotificationPage(),
     ),
     Center(
-      child: Text(
+      child:
+      Text(
         "Settings Screen",
-        style: TextStyle(fontSize: 24, color: Colors.black),
+        style: TextStyle(fontSize: 24),
       ),
     ),
   ];
@@ -62,7 +64,7 @@ class _BaseScreenState extends State<BaseScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: (){ Navigator.pushNamed(context, '/camera');},
         backgroundColor: Colors.lightBlue,
-        shape: const CircleBorder(), // Ensures the FAB is completely circular
+        shape: const CircleBorder(),
         child: const Icon(Icons.camera_alt, color: Colors.white),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked, // Keeps FAB centered
