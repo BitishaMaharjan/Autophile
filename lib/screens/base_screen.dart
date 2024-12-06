@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:autophile/widgets/custom_bottom_navbar.dart';
 import 'package:autophile/screens/search_page.dart';
 
+import 'Notification.dart';
+
 
 class BaseScreen extends StatefulWidget {
   final VoidCallback onCameraTapped;
