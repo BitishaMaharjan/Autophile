@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 
 class SearchBarWidget extends StatelessWidget {
   final VoidCallback onMicPressed;
+  final ValueChanged<String> onChanged;
 
-  const SearchBarWidget({required this.onMicPressed});
+  const SearchBarWidget({
+    required this.onChanged,
+    required this.onMicPressed
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -11,6 +15,7 @@ class SearchBarWidget extends StatelessWidget {
       elevation: 3,
       borderRadius: BorderRadius.circular(40),
       child: TextField(
+        onChanged: onChanged,
         cursorColor: Theme.of(context).colorScheme.inversePrimary.withOpacity(0.5),
         decoration: InputDecoration(
           hintText: "Search Car",
