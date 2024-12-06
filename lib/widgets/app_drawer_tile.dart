@@ -13,7 +13,10 @@ class AppDrawerTile extends StatelessWidget {
       padding: const EdgeInsets.only(left:25.0),
       child: ListTile(
         title: Text(text,style: TextStyle(
-            color: Theme.of(context).colorScheme.inversePrimary
+            color: Theme.of(context).colorScheme.inversePrimary,
+          fontWeight: FontWeight.w600,
+          fontSize: 16,
+
         ),
         ),
         leading: Icon(icon,color: Theme.of(context).colorScheme.inversePrimary,),
