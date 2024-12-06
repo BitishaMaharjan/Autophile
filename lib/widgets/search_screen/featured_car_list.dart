@@ -15,7 +15,7 @@ class FeaturedCarsList extends StatelessWidget {
             width: MediaQuery.of(context).size.width * 0.7,
             margin: const EdgeInsets.only(right: 15),
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
