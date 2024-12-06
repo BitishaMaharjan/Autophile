@@ -1,4 +1,5 @@
 import 'package:autophile/screens/camera_page.dart';
+import 'package:autophile/screens/comment_screen.dart';
 import 'package:autophile/screens/landing_page.dart';
 import 'package:autophile/widgets/comment_widget.dart';
 import 'package:flutter/material.dart';
@@ -29,14 +30,8 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Autophile',
           theme: themeProvider.themeData,
-          home: CameraPage(),
+          home: CommentScreen(),
           debugShowCheckedModeBanner: false,
-          initialRoute: '/home',
-          routes: {
-            '/home': (context) => BaseScreen(onCameraTapped: _onCameraTapped),
-            '/landing': (context) => LandingPage(),
-          },
-
         );
       },
     );
