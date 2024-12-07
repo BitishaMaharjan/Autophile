@@ -1,6 +1,8 @@
+import 'package:autophile/screens/Dashboard/base_screen.dart';
 import 'package:autophile/screens/onboarding/landing_page.dart';
 import 'package:autophile/screens/dashboard/settings_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:async';
 
@@ -12,27 +14,36 @@ class SplashWrapper extends StatefulWidget {
 }
 
 class _SplashWrapperState extends State<SplashWrapper> {
-  bool _isLoading = true;
+  final storage = FlutterSecureStorage();
 
   @override
   void initState() {
     super.initState();
-    _startLoading();
+    _checkUserId();
   }
 
-  void _startLoading() {
-    Timer(const Duration(seconds: 4), () {
-      setState(() {
-        _isLoading = false;
-      });
-    });
+
+  void _checkUserId() async {
+    await Future.delayed(const Duration(seconds: 4));
+
+    String? userId = await storage.read(key: 'userId');
+
+    if (userId != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => BaseScreen()),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LandingPage()),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return _isLoading
-        ? const SplashScreen()
-        : const LandingPage();
+    return const SplashScreen();
   }
 }
 

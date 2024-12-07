@@ -1,9 +1,12 @@
+import 'package:autophile/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:autophile/widgets/home_screen/post_list_widget.dart';
 import 'package:autophile/widgets/home_screen/carousel_widget.dart';
 
 class HomeScreen extends StatelessWidget {
-  // Dummy data for the carousel items
+  final UserModel? user;
+
+  HomeScreen(this.user, {Key? key}) : super(key: key);
   final List<Map<String, String>> carouselItems = [
     {
       'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsn3IBz0b-p2TsmIxg4IXXstEaYLGXquVHMg&s',
@@ -78,7 +81,7 @@ class HomeScreen extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.all(10), // Padding inside the container for the text
                         child: Text(
-                          'Hi! Bitisha Maharjan',
+                          'Hi! ${user?.email ?? 'Guest'}',
                           style: TextStyle(
                             fontSize: 12, // Smaller text size
                             fontWeight: FontWeight.bold, // Bold text

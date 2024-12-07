@@ -86,7 +86,7 @@ class MyApp extends StatelessWidget {
           routes: {
             '/': (context) => const SplashWrapper(), // Splash screen route
             '/auth': (context) => const Login_Page(),   // Login screen route
-            '/home': (context) => BaseScreen(onCameraTapped: _onCameraTapped), // Base screen route
+            '/home': (context) => BaseScreen(), // Base screen route
             '/landing': (context) => LandingPage(),
             '/camera': (context) => CameraPage(),
           },
