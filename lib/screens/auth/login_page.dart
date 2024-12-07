@@ -1,9 +1,16 @@
+import 'package:autophile/models/user_model.dart';
 import 'package:autophile/screens/auth/forgot_password.dart';
 import 'package:autophile/screens/auth/signup_page.dart';
-import 'package:autophile/widgets/app_button.dart';
 import 'package:autophile/screens/dashboard/base_screen.dart';
+import 'package:autophile/widgets/app_button.dart';
 import 'package:autophile/widgets/app_textfield.dart';
+import 'package:bcrypt/bcrypt.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class Login_Page extends StatefulWidget {
   const Login_Page({super.key});
@@ -15,11 +22,117 @@ class Login_Page extends StatefulWidget {
 class _Login_PageState extends State<Login_Page> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  // bool _isEmailValid=false;
-  // String _email='';
-  bool _isPasswordHidden=true;
+  final storage = FlutterSecureStorage();
 
-  final RegExp emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[cC][oO][mM]$');
+  void showErrorToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.TOP,
+      timeInSecForIosWeb: 2,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
+  void showSuccessToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.TOP,
+      timeInSecForIosWeb: 2,
+      backgroundColor: Colors.lightGreenAccent,
+      textColor: Colors.black,
+      fontSize: 16.0,
+    );
+  }
+
+
+  Future<void> loginWithGoogle() async {
+    try {
+      GoogleSignIn googleSignIn = GoogleSignIn();
+
+      GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        return null;
+      }
+
+      GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      User? user = userCredential.user;
+
+      if (user == null) {
+        showErrorToast("Failed to sign in with Google");
+        return null;
+      }
+
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (!userDoc.exists) {
+        final newUser = UserModel(
+          id: user.uid,
+          name: user.displayName ?? null,
+          email: user.email!,
+          photo: user.photoURL,
+          isVerified: true,
+        );
+
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set(newUser.toJson());
+      }
+
+      await storage.write(key: 'userId', value: user.uid);
+
+      showSuccessToast('Welcome');
+
+      Future.delayed(Duration(seconds: 1), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => BaseScreen()),
+        );
+      });
+
+    } catch (e) {
+      showErrorToast("Error: ${e.toString()}");
+      return null;
+    }
+  }
+
+  Future<void> login()async{
+    try{
+      var queryResult = await FirebaseFirestore.instance.collection('users').where('email',isEqualTo: emailController.text).get();
+      if(queryResult.docs.isEmpty){
+        showErrorToast('User not found!!!');
+        return;
+      }
+      var result = queryResult.docs.first;
+
+      String storedPassword = result['password'];
+      if(BCrypt.checkpw(passwordController.text, storedPassword)){
+        String userId = result['userId'];
+        await storage.write(key: 'userId', value: userId);
+        showSuccessToast('Welcome');
+        Future.delayed(Duration(seconds: 1),(){Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>BaseScreen()));});
+      }else{
+        showErrorToast('Password is incorrect');
+      }
+    }catch(e){
+      showErrorToast(e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,13 +193,7 @@ class _Login_PageState extends State<Login_Page> {
                   )),
                 ),
                 SizedBox(height: 35,),
-                AppButton(text: "Sign in", onTap: () {
-                  // Perform sign-in logic here (e.g., validation/authentication)
-                  Navigator.pushNamed(
-                    context,
-                    '/home'
-                  );
-                },),
+                AppButton(text: "Sign in", onTap: login),
                 SizedBox(height: 28,),
                 Row(
                   children: [
@@ -106,9 +213,7 @@ class _Login_PageState extends State<Login_Page> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     GestureDetector(
-                      onTap: (){
-
-                      },
+                      onTap:(){},
                       child: Container(
                         width: 108,
                         decoration: BoxDecoration(
@@ -128,9 +233,7 @@ class _Login_PageState extends State<Login_Page> {
                     ),
                     SizedBox(width: 15,),
                     GestureDetector(
-                      onTap: (){
-
-                      },
+                      onTap: loginWithGoogle,
                       child: Container(
                         width: 108,
                         decoration: BoxDecoration(

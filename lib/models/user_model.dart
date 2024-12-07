@@ -2,7 +2,7 @@ class UserModel {
   final String? id;
   final String? name;
   final String email;
-  final String password;
+  final String? password;
   final String? address;
   final String? photo;
   final bool? isVerified;
@@ -11,7 +11,7 @@ class UserModel {
     this.id,
     this.name,
     required this.email,
-    required this.password,
+    this.password,
     this.address,
     this.photo,
     this.isVerified = false,
@@ -39,5 +39,13 @@ class UserModel {
       'photo': photo,
       'isVerified': isVerified
     };
+  }
+
+  factory UserModel.fromFirestore(String id, Map<String, dynamic> data) {
+    return UserModel(
+      id: id,
+      name: data['name'] ?? '',
+      email: data['email'] ?? '',
+    );
   }
 }
