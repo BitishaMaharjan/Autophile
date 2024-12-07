@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "383950845514",
+    "project_id": "autophile-13aa3",
+    "storage_bucket": "autophile-13aa3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:383950845514:android:aa8f02946b8d22c3bf98b3",
+        "android_client_info": {
+          "package_name": "com.example.autophile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAOzXg_pOVh9g9HIg-fbS9qL-ncTuYVGg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

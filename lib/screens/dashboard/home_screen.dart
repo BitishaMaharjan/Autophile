@@ -1,5 +1,7 @@
+import 'package:autophile/models/user_model.dart';
+import 'package:flutter/material.dart';
+import 'package:autophile/widgets/home_screen/post_list_widget.dart';
 import 'dart:io';
-
 import 'package:autophile/widgets/home_screen/carousel_widget.dart';
 import 'package:autophile/widgets/home_screen/home_floating_button.dart';
 import 'package:autophile/widgets/home_screen/post_list_widget.dart';
@@ -23,6 +25,12 @@ class _HomeScreenState extends State<HomeScreen> {
     _tagController.dispose();
     super.dispose();
   }
+
+
+class HomeScreen extends StatelessWidget {
+  final UserModel? user;
+
+  HomeScreen(this.user, {Key? key}) : super(key: key);
 
   final List<Map<String, String>> carouselItems = [
     {
@@ -270,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Container(
                         padding: EdgeInsets.all(10),
                         child: Text(
-                          'Hi! Bitisha Maharjan',
+                          'Hi! ${user?.email ?? 'Guest'}',
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,

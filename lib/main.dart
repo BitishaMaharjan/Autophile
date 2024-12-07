@@ -1,13 +1,18 @@
-import 'package:autophile/themes/theme_provider.dart';
-import 'package:autophile/screens/onboarding/SplashWrapper.dart';
-import 'package:autophile/screens/auth/login_page.dart';
-import 'package:autophile/screens/dashboard/base_screen.dart';
-import 'package:autophile/screens/onboarding/landing_page.dart';
 import 'package:autophile/screens/camera_scan/camera_page.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:autophile/screens/onboarding/landing_page.dart';
+import 'package:autophile/screens/Dashboard/base_screen.dart';
+import 'package:autophile/screens/auth/login_page.dart'; // Import LoginPage
+import 'package:autophile/screens/onboarding/SplashWrapper.dart'; // Import SplashScreen
+import 'package:autophile/themes/theme_provider.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(),
@@ -35,7 +40,7 @@ class MyApp extends StatelessWidget {
           routes: {
             '/': (context) => const SplashWrapper(), // Splash screen route
             '/auth': (context) => const Login_Page(),   // Login screen route
-            '/home': (context) => BaseScreen(onCameraTapped: _onCameraTapped), // Base screen route
+            '/home': (context) => BaseScreen(), // Base screen route
             '/landing': (context) => LandingPage(),
             '/camera': (context) => CameraPage(),
           },

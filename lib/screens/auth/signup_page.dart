@@ -1,8 +1,15 @@
 import 'package:autophile/screens/auth/login_page.dart';
+import 'package:autophile/screens/auth/verify_email_page.dart';
 import 'package:autophile/widgets/app_button.dart';
 import 'package:autophile/widgets/app_textfield.dart';
+import 'package:bcrypt/bcrypt.dart';
+import 'package:email_otp/email_otp.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:autophile/models/user_model.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -16,10 +23,95 @@ class _SignupPageState extends State<SignupPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
-  // bool _isEmailValid=false;
-  // String _email='';
-  // bool _isPasswordHidden=true;
   bool _isChecked=false;
+
+  void sendOTP()async{
+    EmailOTP.config(
+      appName: 'Autophile',
+      otpType: OTPType.numeric,
+      expiry : 60000,
+      emailTheme: EmailTheme.v3,
+      appEmail: 'info@autophile.com',
+      otpLength: 6,
+    );
+    bool result = await EmailOTP.sendOTP(email: emailController.text);
+    if(result){
+      Navigator.push(context, MaterialPageRoute(builder: (context) => VerifyEmailPage(email: emailController.text)));
+    }else{
+      showErrorToast('Something went wrong while sending OTP');
+    }
+  }
+
+  void showErrorToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.TOP,
+      timeInSecForIosWeb: 2,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
+
+  Future<void> signUp() async {
+    if(!_isChecked){
+      showErrorToast('Please agree to user agreement to continue');
+      return;
+    }
+    if (!emailRegex.hasMatch(emailController.text)) {
+      showErrorToast('Invalid Email Format');
+      return;
+    }
+
+    if (passwordController.text != confirmPasswordController.text) {
+      showErrorToast('Password do not match');
+      return;
+    }
+
+    if (passwordController.text.length < 8) {
+      showErrorToast('Password must be at least 8 characters long');
+      return;
+    }
+
+    try {
+      final checkEmail = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: emailController.text)
+          .get();
+
+      if (checkEmail.docs.isNotEmpty) {
+        showErrorToast('Email is already in use');
+        return;
+      }
+
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
+      
+      String hashedPassword = BCrypt.hashpw(passwordController.text, BCrypt.gensalt());
+
+      final newUser = UserModel(
+        id: userCredential.user!.uid,
+        email: emailController.text,
+        password: hashedPassword,
+      );
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set(newUser.toJson());
+
+      sendOTP();
+    } catch (e) {
+      print("Error during signup: $e");
+      showErrorToast(e.toString());
+    }
+  }
+
+
+
 
   final RegExp emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[cC][oO][mM]$');
   @override
@@ -125,7 +217,7 @@ class _SignupPageState extends State<SignupPage> {
                     ),
 
                     SizedBox(height: 12,),
-                    AppButton(text: "Sign up", onTap: (){}),
+                    AppButton(text: "Sign up", onTap: signUp),
                     SizedBox(height: 28,),
                     Row(
                       children: [
