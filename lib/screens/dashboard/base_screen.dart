@@ -7,6 +7,7 @@ import 'package:autophile/screens/dashboard/home_screen.dart';
 import 'package:autophile/screens/dashboard/search_page.dart';
 import 'package:autophile/screens/dashboard/Notification.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:autophile/screens/dashboard/profile_screen.dart';
 
 
 class BaseScreen extends StatefulWidget {
@@ -49,25 +50,21 @@ class _BaseScreenState extends State<BaseScreen> {
 
   }
 
-  List<Widget> _getScreens() {
-    return [
-      Center(
-        child: HomeScreen(currentUser),
-      ),
-      Center(
-        child: SearchPage(),
-      ),
-      Center(
-        child: NotificationPage(),
-      ),
-      Center(
-        child: Text(
-          "Settings Screen",
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
-    ];
-  }
+
+  final List<Widget> _screens = [
+    Center(
+      child: HomeScreen(),
+    ),
+    Center(
+      child: SearchPage(),
+    ),
+    Center(
+      child: NotificationPage(),
+    ),
+    Center(
+      child: ProfileScreen(),
+    ),
+  ];
 
 
   void _onItemTapped(int index) {
