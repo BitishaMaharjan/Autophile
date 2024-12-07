@@ -1,6 +1,9 @@
-
-import 'package:autophile/screens/profile_screen.dart';
 import 'package:autophile/themes/theme_provider.dart';
+import 'package:autophile/screens/onboarding/SplashWrapper.dart';
+import 'package:autophile/screens/auth/login_page.dart';
+import 'package:autophile/screens/dashboard/base_screen.dart';
+import 'package:autophile/screens/onboarding/landing_page.dart';
+import 'package:autophile/screens/camera_scan/camera_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,6 +18,9 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+  void _onCameraTapped() {
+    print('Camera tapped');
+  }
 
   // This widget is the root of your application.
   @override
