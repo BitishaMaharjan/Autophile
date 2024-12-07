@@ -47,6 +47,7 @@ class DefaultFirebaseOptions {
     projectId: 'autophile-13aa3',
     authDomain: 'autophile-13aa3.firebaseapp.com',
     storageBucket: 'autophile-13aa3.firebasestorage.app',
+    databaseURL: "https://autophile-13aa3-default-rtdb.firebaseio.com",
     measurementId: 'G-T7B1CNRT2L',
   );
 

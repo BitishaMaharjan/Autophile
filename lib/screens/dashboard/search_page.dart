@@ -4,6 +4,7 @@ import 'package:autophile/widgets/search_screen/trending_news_list.dart';
 import 'package:autophile/widgets/search_screen/search_bar.dart';
 import 'package:autophile/widgets/search_screen/mic_modal.dart';
 import 'package:autophile/widgets/search_screen/car_brand_section.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:autophile/screens/dashboard/search_result.dart';
 
 class SearchPage extends StatefulWidget {
@@ -12,6 +13,64 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
+  FirebaseDatabase database = FirebaseDatabase.instance;
+  DatabaseReference ref = FirebaseDatabase.instance.ref();
+
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCarModel();
+  }
+
+  // Fetch the data asynchronously
+
+  Future<void> _fetchCarModel() async {
+    try {
+      DatabaseEvent event = await ref.once();
+      Query query = ref.orderByChild("Model").limitToFirst(10);
+
+      DataSnapshot event2 = await query.get();
+      print(event2);
+
+      if (event.snapshot.value != null) {
+        var data = event.snapshot.value;
+
+        String? carMake, carModel, carYear;
+
+        if (data is List) {
+          var firstCar = data.firstWhere(
+                (car) => car is Map<String, dynamic>,
+            orElse: () => null,
+          );
+
+          if (firstCar != null) {
+            carMake = firstCar['Make'];
+            carModel = firstCar['Model'];
+            carYear = firstCar['Year']?.toString();
+          }
+        } else if (data is Map<String, dynamic>) {
+          carMake = data['Make'];
+          carModel = data['Model'];
+          carYear = data['Year']?.toString(); // Safe call with null check
+        }
+
+        setState(() {
+          // Uncomment and use your state variables here
+          // carMakeState = carMake;
+          // carModelState = carModel;
+          // carYearState = carYear;
+        });
+
+      } else {
+        print("No data found in the database.");
+      }
+    } catch (e) {
+      print("Error fetching data: $e");
+    }
+  }
+
+
   bool isSearching = false; // Tracks if search results should be displayed
   String searchQuery = '';
   final List<Map<String, dynamic>> carBrands = [
