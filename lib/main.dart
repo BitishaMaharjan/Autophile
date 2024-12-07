@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -49,7 +48,7 @@ class MyApp extends StatelessWidget {
           routes: {
             '/': (context) => const SplashWrapper(),
             '/auth': (context) => const Login_Page(),
-            '/home': (context) => BaseScreen(onCameraTapped: _onCameraTapped),
+            '/home': (context) => BaseScreen(),
             '/landing': (context) => LandingPage(),
             '/camera': (context) => CameraPage(),
           },

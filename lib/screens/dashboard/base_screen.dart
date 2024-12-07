@@ -6,8 +6,8 @@ import 'package:autophile/widgets/custom_bottom_navbar.dart';
 import 'package:autophile/screens/dashboard/home_screen.dart';
 import 'package:autophile/screens/dashboard/search_page.dart';
 import 'package:autophile/screens/dashboard/Notification.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:autophile/screens/dashboard/profile_screen.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 
 class BaseScreen extends StatefulWidget {
@@ -40,9 +40,9 @@ class _BaseScreenState extends State<BaseScreen> {
       DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
       if(userDoc.exists){
         setState(() {
-        currentUser = UserModel.fromFirestore(
-            userDoc.id, userDoc.data() as Map<String, dynamic>);
-      });
+          currentUser = UserModel.fromFirestore(
+              userDoc.id, userDoc.data() as Map<String, dynamic>);
+        });
       }
     }catch(e){
       print(e);
@@ -50,21 +50,22 @@ class _BaseScreenState extends State<BaseScreen> {
 
   }
 
-
-  final List<Widget> _screens = [
-    Center(
-      child: HomeScreen(),
-    ),
-    Center(
-      child: SearchPage(),
-    ),
-    Center(
-      child: NotificationPage(),
-    ),
-    Center(
-      child: ProfileScreen(),
-    ),
-  ];
+  List<Widget> _getScreens() {
+    return [
+      Center(
+        child: HomeScreen(currentUser),
+      ),
+      Center(
+        child: SearchPage(),
+      ),
+      Center(
+        child: NotificationPage(),
+      ),
+      Center(
+        child: ProfileScreen(),
+      ),
+    ];
+  }
 
 
   void _onItemTapped(int index) {
@@ -79,8 +80,8 @@ class _BaseScreenState extends State<BaseScreen> {
       backgroundColor:  Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: currentUser == null
-      ? Center(child: CircularProgressIndicator())
-          : Padding(
+            ? Center(child: CircularProgressIndicator())
+            : Padding(
           padding: const EdgeInsets.only(top: 5.0),
           child: IndexedStack(
             index: _selectedIndex,
