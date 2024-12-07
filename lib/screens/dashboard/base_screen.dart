@@ -4,6 +4,7 @@ import 'package:autophile/widgets/custom_bottom_navbar.dart';
 import 'package:autophile/screens/dashboard/home_screen.dart';
 import 'package:autophile/screens/dashboard/search_page.dart';
 import 'package:autophile/screens/dashboard/Notification.dart';
+import 'package:autophile/screens/dashboard/profile_screen.dart';
 
 
 class BaseScreen extends StatefulWidget {
@@ -29,11 +30,7 @@ class _BaseScreenState extends State<BaseScreen> {
       child: NotificationPage(),
     ),
     Center(
-      child:
-      Text(
-        "Settings Screen",
-        style: TextStyle(fontSize: 24),
-      ),
+      child: ProfileScreen(),
     ),
   ];
 
