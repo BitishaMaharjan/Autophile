@@ -1,9 +1,11 @@
 import 'package:autophile/screens/auth/forgot_password.dart';
 import 'package:autophile/screens/auth/signup_page.dart';
 import 'package:autophile/widgets/app_button.dart';
-import 'package:autophile/screens/dashboard/base_screen.dart';
 import 'package:autophile/widgets/app_textfield.dart';
+import 'package:bcrypt/bcrypt.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class Login_Page extends StatefulWidget {
   const Login_Page({super.key});
@@ -15,11 +17,50 @@ class Login_Page extends StatefulWidget {
 class _Login_PageState extends State<Login_Page> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  // bool _isEmailValid=false;
-  // String _email='';
-  bool _isPasswordHidden=true;
 
-  final RegExp emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[cC][oO][mM]$');
+  void showErrorToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.TOP,
+      timeInSecForIosWeb: 2,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
+  void showSuccessToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.TOP,
+      timeInSecForIosWeb: 2,
+      backgroundColor: Colors.lightGreenAccent,
+      textColor: Colors.black,
+      fontSize: 16.0,
+    );
+  }
+
+  Future<void> login()async{
+    try{
+      var queryResult = await FirebaseFirestore.instance.collection('users').where('email',isEqualTo: emailController.text).get();
+      if(queryResult.docs.isEmpty){
+        showErrorToast('User not found!!!');
+        return;
+      }
+      var result = queryResult.docs.first;
+
+      String storedPassword = result['password'];
+      if(BCrypt.checkpw(passwordController.text, storedPassword)){
+        showSuccessToast('Welcome');
+        Future.delayed(Duration(seconds: 1),(){Navigator.pushNamed(context, '/home');});
+      }
+    }catch(e){
+      showErrorToast(e.toString());
+    }
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,13 +121,7 @@ class _Login_PageState extends State<Login_Page> {
                   )),
                 ),
                 SizedBox(height: 35,),
-                AppButton(text: "Sign in", onTap: () {
-                  // Perform sign-in logic here (e.g., validation/authentication)
-                  Navigator.pushNamed(
-                    context,
-                    '/home'
-                  );
-                },),
+                AppButton(text: "Sign in", onTap: login),
                 SizedBox(height: 28,),
                 Row(
                   children: [
