@@ -93,6 +93,17 @@ class _Login_PageState extends State<Login_Page> {
             .set(newUser.toJson());
       }
 
+      await storage.write(key: 'userId', value: user.uid);
+
+      showSuccessToast('Welcome');
+
+      Future.delayed(Duration(seconds: 1), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => BaseScreen()),
+        );
+      });
+
     } catch (e) {
       showErrorToast("Error: ${e.toString()}");
       return null;
