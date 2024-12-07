@@ -2,6 +2,7 @@ import 'package:autophile/screens/auth/login_page.dart';
 import 'package:autophile/screens/auth/verify_email_page.dart';
 import 'package:autophile/widgets/app_button.dart';
 import 'package:autophile/widgets/app_textfield.dart';
+import 'package:bcrypt/bcrypt.dart';
 import 'package:email_otp/email_otp.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -88,11 +89,13 @@ class _SignupPageState extends State<SignupPage> {
         email: emailController.text,
         password: passwordController.text,
       );
+      
+      String hashedPassword = BCrypt.hashpw(passwordController.text, BCrypt.gensalt());
 
       final newUser = UserModel(
         id: userCredential.user!.uid,
         email: emailController.text,
-        password: passwordController.text,
+        password: hashedPassword,
       );
 
       await FirebaseFirestore.instance
