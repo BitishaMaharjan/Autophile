@@ -1,9 +1,7 @@
-import 'package:autophile/screens/camera_page.dart';
-import 'package:autophile/screens/comment_screen.dart';
-import 'package:autophile/screens/landing_page.dart';
-import 'package:autophile/widgets/comment_widget.dart';
+
+import 'package:autophile/screens/home_screen.dart';
+
 import 'package:flutter/material.dart';
-import 'package:autophile/screens/base_screen.dart';
 import 'package:autophile/themes/theme_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -19,9 +17,6 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  void _onCameraTapped() {
-    print('Camera tapped');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +25,13 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Autophile',
           theme: themeProvider.themeData,
-          home: CommentScreen(),
+          home: HomeScreen(),
           debugShowCheckedModeBanner: false,
         );
       },
     );
   }
 }
+
+
+
