@@ -23,6 +23,7 @@ class _SignupPageState extends State<SignupPage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
   bool _isChecked=false;
 
   void sendOTP()async{
@@ -94,6 +95,7 @@ class _SignupPageState extends State<SignupPage> {
 
       final newUser = UserModel(
         id: userCredential.user!.uid,
+        name: nameController.text,
         email: emailController.text,
         password: hashedPassword,
       );
@@ -150,6 +152,12 @@ class _SignupPageState extends State<SignupPage> {
                         ],
                       ),
                     SizedBox(height: 39,),
+                    AppTextField(
+                      controller: nameController,
+                      hintText: "Enter your name",
+                      labelText: 'Name',
+                    ),
+                    SizedBox(height: 17,),
                     AppTextField(
                       controller: emailController,
                       hintText: 'Enter your email',

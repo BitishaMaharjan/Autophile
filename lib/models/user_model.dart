@@ -5,6 +5,7 @@ class UserModel {
   final String? password;
   final String? address;
   final String? photo;
+  final String? bio;
   final bool? isVerified;
 
   const UserModel({
@@ -14,6 +15,7 @@ class UserModel {
     this.password,
     this.address,
     this.photo,
+    this.bio,
     this.isVerified = false,
   });
 
@@ -22,9 +24,10 @@ class UserModel {
       id: json['userId'] as String?,
       name: json['name'] as String?,
       email: json['email'] as String,
-      password: json['password'] as String,
+      password: json['password'] as String?,
       address: json['address'] as String?,
       photo: json['photo'] as String?,
+      bio: json['bio'] as String?,
       isVerified: json['isVerified'] as bool? ?? false,
     );
   }
@@ -37,7 +40,8 @@ class UserModel {
       'password': password,
       'address': address,
       'photo': photo,
-      'isVerified': isVerified
+      'bio': bio,
+      'isVerified': isVerified,
     };
   }
 
@@ -46,6 +50,9 @@ class UserModel {
       id: id,
       name: data['name'] ?? '',
       email: data['email'] ?? '',
+      photo: data['photo'] ?? '',
+      address: data['address'] ?? '',
+      bio: data['bio'] ?? '',
     );
   }
 }

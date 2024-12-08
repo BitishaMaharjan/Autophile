@@ -22,8 +22,9 @@ class ProfileHeader extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        const SizedBox(height: 30,),
         CircleAvatar(
-          radius: 80,
+          radius: 60,
           backgroundImage: NetworkImage(profileImageUrl),
         ),
         const SizedBox(height: 7),
@@ -34,7 +35,7 @@ class ProfileHeader extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 5),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -46,29 +47,28 @@ class ProfileHeader extends StatelessWidget {
             const SizedBox(width: 4.75),
             Text(
               location,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: Colors.grey,
+                color: Theme.of(context).colorScheme.onPrimary,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 5),
         Text(
           bio,
           textAlign: TextAlign.center,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w400,
-            color: Colors.black,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 5),
         ElevatedButton(
           onPressed: onEditProfile,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xff2E3448),
+            backgroundColor: Theme.of(context).colorScheme.secondary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(11),
             ),
