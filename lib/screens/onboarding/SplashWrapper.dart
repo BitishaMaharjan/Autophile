@@ -29,15 +29,9 @@ class _SplashWrapperState extends State<SplashWrapper> {
     String? userId = await storage.read(key: 'userId');
 
     if (userId != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => BaseScreen()),
-      );
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LandingPage()),
-      );
+      Navigator.pushReplacementNamed(context, '/auth');
     }
   }
 
