@@ -1,3 +1,4 @@
+import 'package:autophile/models/user_model.dart';
 import 'package:autophile/widgets/home_screen/post_list_widget.dart';
 import 'package:autophile/widgets/profile_header.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,9 @@ import 'package:autophile/widgets/app_drawer.dart';
 import 'package:autophile/widgets/saved_photos.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final UserModel? user;
+
+  ProfileScreen(this.user, {Key? key}) : super(key: key);
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -70,8 +73,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // Assign the GlobalKey to the Scaffold
-      endDrawer: const AppDrawer(),
+      key: _scaffoldKey,
+      // endDrawer: const AppDrawer(),
       body: SafeArea(
         child: Container(
           decoration: BoxDecoration(
@@ -88,10 +91,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           const SizedBox(height: 10),
                           ProfileHeader(
-                            profileImageUrl: "assets/images/profile _picture.png",
-                            name: "Bitisha Maharjan",
-                            location: "Kathmandu, Nepal",
-                            bio: "Car enthusiast / heritage lover",
+                            profileImageUrl:
+                            widget.user?.photo?.isEmpty ?? true ? 'https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png'
+                                : widget.user!.photo!,
+                            name:
+                            widget.user?.name?.isEmpty ?? true ? 'User' : widget.user!.name!,
+                            location:
+                            widget.user?.address?.isEmpty ?? true ? 'Earth' : widget.user!.address!,
+                            bio:
+                            widget.user?.bio?.isEmpty ?? true ? 'Car Enthusiast' : widget.user!.bio!,
                             onEditProfile: () {},
                           ),
                           const SizedBox(height: 26),
@@ -150,7 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         right: 0,
                         child: GestureDetector(
                           onTap: () {
-                            _scaffoldKey.currentState!.openEndDrawer(); // Use the GlobalKey to open the drawer
+                            Scaffold.of(context).openEndDrawer();
                           },
                           child: const Icon(
                             Icons.settings,
