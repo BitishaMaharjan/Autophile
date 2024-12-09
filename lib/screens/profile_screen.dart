@@ -1,3 +1,4 @@
+import 'package:autophile/screens/edit_profile.dart';
 import 'package:autophile/widgets/home_screen/post_list_widget.dart';
 import 'package:autophile/widgets/profile_header.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +93,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             name: "Bitisha Maharjan",
                             location: "Kathmandu, Nepal",
                             bio: "Car enthusiast / heritage lover",
-                            onEditProfile: () {},
+                            onEditProfile: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => EditProfileScreen()),
+                              );
+
+                            },
                           ),
                           const SizedBox(height: 26),
                           Row(
