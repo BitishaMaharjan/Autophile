@@ -1,4 +1,5 @@
 import 'package:autophile/screens/auth/login_page.dart';
+import 'package:autophile/screens/change_password.dart';
 import 'package:autophile/screens/dashboard/settings_page.dart';
 import 'package:autophile/themes/theme_provider.dart';
 import 'package:autophile/widgets/app_drawer_tile.dart';
@@ -114,7 +115,8 @@ class AppDrawer extends StatelessWidget {
                   AppDrawerTile(
                     text: 'Change Password',
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.push(context,
+                      MaterialPageRoute(builder: (context)=> ChangePasswordScreen()));
                     },
                     icon: Icons.lock_reset_rounded,
                   ),
