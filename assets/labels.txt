@@ -1,0 +1,8 @@
+0 Suzuki swift 2018
+1 Hyndai Tucso
+2 Honda CR-V
+3 KIA Soul
+4 Tesla Model X
+5 Toyota Corolla 2004
+6 Mercedes-Benz GLC
+7 Ferrari 488
