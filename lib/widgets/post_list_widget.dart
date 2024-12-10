@@ -10,7 +10,6 @@ class PostListWidget extends StatefulWidget {
 }
 
 class _PostListWidgetState extends State<PostListWidget> {
-  // Function to show the comment modal with the CommentWidget
   void _showCommentModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -20,7 +19,7 @@ class _PostListWidgetState extends State<PostListWidget> {
       ),
       builder: (context) {
         return FractionallySizedBox(
-          heightFactor: 0.7, // Restrict the modal to half the screen height
+          heightFactor: 0.7,
           child: Padding(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -88,7 +87,6 @@ class _PostListWidgetState extends State<PostListWidget> {
                 Text(post['content'] ?? '', style: TextStyle(fontSize: 14)),
                 SizedBox(height: 10),
 
-                // Post Image
                 Center(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(10),
@@ -96,12 +94,9 @@ class _PostListWidgetState extends State<PostListWidget> {
                   ),
                 ),
                 SizedBox(height: 10),
-
-                // Action Row with Equal Distribution
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    // Upvote Button and Count
                     Row(
                       children: [
                         IconButton(
@@ -115,8 +110,6 @@ class _PostListWidgetState extends State<PostListWidget> {
                         Text('$upvotes'),
                       ],
                     ),
-
-                    // Downvote Button and Count
                     Row(
                       children: [
                         IconButton(
@@ -131,7 +124,6 @@ class _PostListWidgetState extends State<PostListWidget> {
                       ],
                     ),
 
-                    // Comment Button and Count
                     Row(
                       children: [
                         IconButton(
@@ -143,14 +135,12 @@ class _PostListWidgetState extends State<PostListWidget> {
                       ],
                     ),
 
-                    // Share Button and Count
                     Row(
                       children: [
                         IconButton(
                           icon: Icon(Icons.share_outlined, size: 24),
                           color: Colors.grey,
                           onPressed: () {
-                            // Handle share action
                           },
                         ),
                         Text('$shares'),
@@ -190,13 +180,11 @@ class _CommentWidgetState extends State<CommentWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Top Bar with Back Icon, Title, and Info Icon
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Back Icon
               IconButton(
                 icon: Icon(Icons.arrow_back),
                 onPressed: () => Navigator.pop(context),
@@ -213,17 +201,14 @@ class _CommentWidgetState extends State<CommentWidget> {
               IconButton(
                 icon: Icon(Icons.info_outline),
                 onPressed: () {
-                  // Handle info icon press
                 },
               ),
             ],
           ),
         ),
 
-        // Divider for separation
         Divider(height: 1, color: Colors.grey),
 
-        // Scrollable List of Comments
         Expanded(
           child: SingleChildScrollView(
             child: Padding(
@@ -293,10 +278,8 @@ class _CommentWidgetState extends State<CommentWidget> {
           ),
         ),
 
-        // Fixed Emoji Row and Add Comment Row
         Column(
           children: [
-            // Emoji Icon Row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: const [
@@ -310,7 +293,6 @@ class _CommentWidgetState extends State<CommentWidget> {
             ),
             const SizedBox(height: 8),
 
-            // Add Comment Row
             Row(
               children: [
                 const CircleAvatar(
@@ -334,7 +316,6 @@ class _CommentWidgetState extends State<CommentWidget> {
                 const SizedBox(width: 8),
                 IconButton(
                   onPressed: () {
-                    // Handle adding a comment
                   },
                   icon: Icon(Icons.send, color: Theme.of(context).colorScheme.onPrimary),
                 ),
