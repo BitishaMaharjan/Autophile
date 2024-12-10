@@ -75,7 +75,7 @@ class ProfileHeader extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
           ),
           child: const Text(
-            "Edit Profile",
+            "Edit Profile ",
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w400,
