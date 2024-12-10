@@ -98,10 +98,7 @@ class _Login_PageState extends State<Login_Page> {
       showSuccessToast('Welcome');
 
       Future.delayed(Duration(seconds: 1), () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => BaseScreen()),
-        );
+        Navigator.pushReplacementNamed(context, '/home');
       });
 
     } catch (e) {
@@ -124,7 +121,8 @@ class _Login_PageState extends State<Login_Page> {
         String userId = result['userId'];
         await storage.write(key: 'userId', value: userId);
         showSuccessToast('Welcome');
-        Future.delayed(Duration(seconds: 1),(){Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>BaseScreen()));});
+        Future.delayed(Duration(seconds: 1),(){
+          Navigator.pushReplacementNamed(context, '/home');});
       }else{
         showErrorToast('Password is incorrect');
       }

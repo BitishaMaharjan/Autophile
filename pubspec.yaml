@@ -83,6 +83,9 @@ flutter:
     - assets/icons/
     - assets/models/
     - assets/.env
+    - assets/images/social_icons/
+    - assets/images/autophile_logo/
+
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

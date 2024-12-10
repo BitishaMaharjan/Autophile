@@ -18,7 +18,7 @@ class CarCardWidget extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(8.0),
-              child: Image.asset(
+              child: Image.network(
                 car['image']!,
                 height: 120,
                 width: 120,

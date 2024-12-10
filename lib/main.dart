@@ -15,17 +15,16 @@ void main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  // Initialize Realtime Database
   final databaseReference = FirebaseDatabase.instance.ref();
   print("Firebase Realtime Database URL: ${databaseReference}");
-
+  final themeProvider = ThemeProvider();
+  await themeProvider.loadTheme();
   runApp(
     ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
+      create: (context) => themeProvider,
       child: const MyApp(),
     ),
   );
@@ -33,9 +32,6 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  void _onCameraTapped() {
-    print('Camera tapped');
-  }
 
   // This widget is the root of your application.
   @override
