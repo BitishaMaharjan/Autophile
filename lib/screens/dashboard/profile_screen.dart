@@ -20,26 +20,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   bool showMyPosts = true;
 
-  final List<Map<String, String>> posts = [
+
+  List<Map<String, dynamic>> posts = [
     {
-      'user': 'Car Guy',
-      'location': 'Monaco, India',
-      'content': 'How much will this cost on average?',
-      'image':
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSO1q5iuu6wJJpVVV5U4Gr_SvpPwdiiYzXGcg&s',
-      'likes': '110',
-      'comments': '3',
-      'shares': '45',
+      'caption': 'First post caption goes here.',
+      'createdAt': '2024-12-01T14:30:00Z',
+      'dislikes': 2,
+      'image': 'https://example.com/image1.jpg',
+      'likes': 10,
+      'postId': '1',
+      'tags': ['Flutter', 'Development', 'Programming'],
+      'userId': 'user1',
+      'comments': 4,
     },
     {
-      'user': 'Tech Enthusiast',
-      'location': 'Silicon Valley, USA',
-      'content': 'What is the latest trend in AI technology?',
-      'image':
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcUoJOCMikZl8T5BA16Uqfl-GGcxemCvfbCw&s',
-      'likes': '150',
-      'comments': '5',
-      'shares': '60',
+      'caption': 'Second post caption, a different one.',
+      'createdAt': '2024-12-02T16:15:00Z',
+      'dislikes': 1,
+      'image': 'https://example.com/image2.jpg',
+      'likes': 15,
+      'postId': '2',
+      'tags': ['Tech', 'Flutter', 'Mobile'],
+      'userId': 'user2',
+      'comments': 4,
+    },
+    {
+      'caption': 'Third post with some interesting content.',
+      'createdAt': '2024-12-03T18:00:00Z',
+      'dislikes': 0,
+      'image': 'https://example.com/image3.jpg',
+      'likes': 25,
+      'postId': '3',
+      'tags': ['Technology', 'Innovation', 'Startups', 'Flutter'],
+      'userId': 'user3',
+      'comments': 4,
     },
   ];
 
