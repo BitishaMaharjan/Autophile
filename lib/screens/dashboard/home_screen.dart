@@ -1,12 +1,64 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:autophile/models/post_model.dart';
 import 'package:autophile/models/user_model.dart';
+import 'package:autophile/widgets/home_screen/home_floating_button.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:autophile/widgets/home_screen/post_list_widget.dart';
 import 'package:autophile/widgets/home_screen/carousel_widget.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   final UserModel? user;
 
   HomeScreen(this.user, {Key? key}) : super(key: key);
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final TextEditingController _descriptionController = TextEditingController();
+
+  final TextEditingController _tagController = TextEditingController();
+
+  List<String> tags = [];
+
+  String? selectedImage;
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    _tagController.dispose();
+    super.dispose();
+  }
+
+  void showErrorToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.TOP,
+      timeInSecForIosWeb: 2,
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
+  void showSuccessToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.TOP,
+      timeInSecForIosWeb: 2,
+      backgroundColor: Colors.lightGreenAccent,
+      textColor: Colors.black,
+      fontSize: 16.0,
+    );
+  }
+
   final List<Map<String, String>> carouselItems = [
     {
       'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsn3IBz0b-p2TsmIxg4IXXstEaYLGXquVHMg&s',
@@ -52,6 +104,216 @@ class HomeScreen extends StatelessWidget {
   ];
 
 
+  Future<String> _convertImageToBase64(String imagePath) async {
+    final bytes = await File(imagePath).readAsBytes();
+    return base64Encode(bytes);
+  }
+
+  Future<void> _createPost() async {
+    if (selectedImage == null || _descriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Please provide an image and caption")));
+      return;
+    }
+
+    try {
+      final imageBase64 = await _convertImageToBase64(selectedImage!);
+      final userId = widget.user?.id;
+
+      final post = PostModel(
+        postId: null,
+        caption: _descriptionController.text.trim(),
+        tags: tags,
+        image: imageBase64,
+        userId: userId!,
+        createdAt: DateTime.now(),
+      );
+
+      final docRef = await FirebaseFirestore.instance.collection('posts').add(post.toJson());
+
+      await FirebaseFirestore.instance.collection('posts').doc(docRef.id).update({
+        'postId': docRef.id,
+      });
+
+      if (docRef.id.isNotEmpty) {
+        showSuccessToast('Post created successfully');
+        Navigator.pop(context);
+      } else {
+        showErrorToast("Post creation failed. Document ID is empty.");
+      }
+    } catch (e) {
+      print('Error creating post: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error creating post: $e")));
+    }
+  }
+
+  void _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        selectedImage = pickedFile.path;
+      });
+    }
+  }
+
+  void _addTag() {
+    if (_tagController.text.trim().isNotEmpty) {
+      setState(() {
+        tags.add(_tagController.text.trim());
+      });
+      _tagController.clear();
+      Navigator.pop(context);
+    }
+  }
+
+  void _showAddTagDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Add a Tag"),
+        content: TextField(
+          controller: _tagController,
+          decoration: const InputDecoration(hintText: "Enter tag"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancel",style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary),),
+          ),
+          ElevatedButton(
+            onPressed: _addTag,
+            child: Text("Add",style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary),),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCreatePostPopup() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        maxChildSize: 0.9,
+        minChildSize: 0.5,
+        expand: false,
+        builder: (context, scrollController) => SingleChildScrollView(
+          controller: scrollController,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 16,
+              right: 16,
+              top: 16,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "Create Post",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _descriptionController,
+                  decoration: const InputDecoration(
+                    hintText: "Write something...",
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 4,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "Tags",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    ...tags.map(
+                          (tag) => Chip(
+                        label: Text(tag),
+                        deleteIcon: const Icon(Icons.close, size: 18),
+                        onDeleted: () {
+                          setState(() {
+                            tags.remove(tag);
+                          });
+                        },
+                      ),
+                    ),
+                    ActionChip(
+                      label: const Text("Add Tag"),
+                      avatar: const Icon(Icons.add),
+                      onPressed: _showAddTagDialog,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "Image",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: selectedImage != null
+                            ? Image.file(
+                          File(selectedImage!),
+                          fit: BoxFit.cover,
+                        )
+                            : const Icon(Icons.add_a_photo, size: 40),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text("Cancel",
+                        style: TextStyle(color: Theme.of(context).colorScheme.secondary),),
+                    ),
+                    const SizedBox(width: 16),
+                    GestureDetector(
+                      onTap: _createPost,
+                      child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.all(Radius.circular(10)),
+                              color: Theme.of(context).colorScheme.secondary
+                          ),
+                          child: Text("Post",style: TextStyle(color: Theme.of(context).colorScheme.primary),)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,7 +343,7 @@ class HomeScreen extends StatelessWidget {
                       child: Container(
                         padding: EdgeInsets.all(10), // Padding inside the container for the text
                         child: Text(
-                          'Hi! ${user?.email ?? 'Guest'}',
+                          'Hi! ${widget.user?.email ?? 'Guest'}',
                           style: TextStyle(
                             fontSize: 12, // Smaller text size
                             fontWeight: FontWeight.bold, // Bold text
@@ -107,6 +369,7 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
+        floatingActionButton:HomeFloatingButton(onPressed: _showCreatePostPopup)
     );
   }
 }
