@@ -9,8 +9,10 @@ import 'package:autophile/screens/auth/login_page.dart';
 import 'package:autophile/screens/onboarding/SplashWrapper.dart';
 import 'package:autophile/themes/theme_provider.dart';
 import 'firebase_options.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
+  await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
