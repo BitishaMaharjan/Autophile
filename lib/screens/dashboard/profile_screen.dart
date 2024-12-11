@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:autophile/widgets/app_drawer.dart';
 import 'package:autophile/widgets/saved_photos.dart';
+import 'package:autophile/widgets/loading_skeleton.dart';
 
 class ProfileScreen extends StatefulWidget {
   final UserModel? user;
@@ -19,7 +20,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool showMyPosts = true;
-
+  bool isLoading = true; // Loading state variable
 
   List<Map<String, dynamic>> posts = [
     {
@@ -85,6 +86,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Simulate loading time
+    Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        isLoading = false; // Data has been loaded
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
@@ -106,14 +118,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(height: 10),
                           ProfileHeader(
                             profileImageUrl:
-                            widget.user?.photo?.isEmpty ?? true ? 'https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png'
+                            widget.user?.photo?.isEmpty ?? true
+                                ? 'https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png'
                                 : widget.user!.photo!,
-                            name:
-                            widget.user?.name?.isEmpty ?? true ? 'User' : widget.user!.name!,
-                            location:
-                            widget.user?.address?.isEmpty ?? true ? 'Earth' : widget.user!.address!,
-                            bio:
-                            widget.user?.bio?.isEmpty ?? true ? 'Car Enthusiast' : widget.user!.bio!,
+                            name: widget.user?.name?.isEmpty ?? true
+                                ? 'User'
+                                : widget.user!.name!,
+                            location: widget.user?.address?.isEmpty ?? true
+                                ? 'Earth'
+                                : widget.user!.address!,
+                            bio: widget.user?.bio?.isEmpty ?? true
+                                ? 'Car Enthusiast'
+                                : widget.user!.bio!,
                             onEditProfile: () {},
                           ),
                           const SizedBox(height: 26),
@@ -162,7 +178,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             thickness: 1,
                           ),
                           const SizedBox(height: 14),
-                          showMyPosts
+                          isLoading
+                              ? LoadingSkeleton(isPost: true, isCarSearch: true) // Show loading indicator
+                              : showMyPosts
                               ? PostListWidget(posts: posts) // My Posts
                               : SavedPhotosWidget(savedPhotos: savedPhotos),
                         ],

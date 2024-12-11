@@ -7,6 +7,7 @@ import 'package:autophile/widgets/search_screen/car_brand_section.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:autophile/screens/dashboard/search_result.dart';
 import 'package:autophile/services/news_service.dart';
+import 'package:autophile/widgets/loading_skeleton.dart';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -180,7 +181,7 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                   const SizedBox(height: 10),
                   isLoading
-                      ? CircularProgressIndicator() // Show loading spinner if still fetching
+                      ? const LoadingSkeleton(isPost:false,isCarSearch: false,) // Show loading spinner if still fetching
                       : TrendingNewsList(trendingCars: trendingCars), // Show trending cars once data is available
                 ],
               ),

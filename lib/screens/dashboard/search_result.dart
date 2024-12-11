@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:autophile/widgets/search_screen/car_card.dart';
-import 'package:autophile/widgets/search_screen/filter_bar.dart';  // Assuming you have this widget
+import 'package:autophile/widgets/search_screen/filter_bar.dart';
+import 'package:autophile/widgets/loading_skeleton.dart'; // Assuming you have this widget
 
 class SearchResultsWidget extends StatefulWidget {
   final String initialSearchQuery;
@@ -15,6 +16,7 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
   late String searchQuery;
   final TextEditingController _searchController = TextEditingController();
   List<Map<String, String>> filteredCars = [];
+  bool isLoading = true;
 
   final List<Map<String, String>> searchResults = [
     {
@@ -53,12 +55,14 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
       filteredCars = searchResults
           .where((car) => car['name']!.toLowerCase().contains(searchQuery.toLowerCase()))
           .toList();
+      isLoading = false;
     });
   }
 
   void onSearchChanged(String query) {
     setState(() {
       searchQuery = query;
+      isLoading = true;
       _updateResults();
     });
   }
@@ -77,23 +81,25 @@ class _SearchResultsWidgetState extends State<SearchResultsWidget> {
             print('Selected brand: $brand');
           },
         ),
-        if (filteredCars.isEmpty)
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              'No results found for "$searchQuery"',
-              style: const TextStyle(fontSize: 18, color: Colors.grey),
-            ),
-          )
-        else
-          ListView.builder(
-            shrinkWrap: true,
-            itemCount: filteredCars.length,
-            itemBuilder: (context, index) {
-              final car = filteredCars[index];
-              return CarCardWidget(car: car);
-            },
+        // Show loading skeleton if isLoading is true
+        isLoading
+            ? LoadingSkeleton(isPost: false, isCarSearch: true)
+            : (filteredCars.isEmpty
+            ? Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'No results found for "$searchQuery"',
+            style: const TextStyle(fontSize: 18, color: Colors.grey),
           ),
+        )
+            : ListView.builder(
+          shrinkWrap: true,
+          itemCount: filteredCars.length,
+          itemBuilder: (context, index) {
+            final car = filteredCars[index];
+            return CarCardWidget(car: car);
+          },
+        )),
       ],
     );
   }
