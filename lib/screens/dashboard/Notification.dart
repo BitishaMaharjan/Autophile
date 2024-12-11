@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:autophile/widgets/loading_skeleton.dart';
 
 class NotificationPage extends StatefulWidget {
   @override
@@ -37,10 +38,22 @@ class _NotificationPageState extends State<NotificationPage> {
       "type": "commit",
     },
   ];
+  bool isLoading = true;
 
   void _toggleReadStatus(int index) {
     setState(() {
       notifications[index]["isRead"] = !notifications[index]["isRead"];
+      isLoading = false;
+    });
+  }
+  @override
+  void initState() {
+    super.initState();
+    // Simulating a delay for loading notifications (e.g., from an API)
+    Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        isLoading = false; // Set to false after data is loaded
+      });
     });
   }
 
@@ -62,7 +75,9 @@ class _NotificationPageState extends State<NotificationPage> {
           ),
         ],
       ),
-      body: ListView.builder(
+      body: isLoading
+          ? LoadingSkeleton(isPost: false, isCarSearch: false, isNotification: true) // Show skeleton while loading
+          :  ListView.builder(
         itemCount: notifications.length,
         itemBuilder: (context, index) {
           final notification = notifications[index];
