@@ -189,7 +189,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                 icon: Icon(Icons.arrow_back),
                 onPressed: () => Navigator.pop(context),
               ),
-              // Title
+
               Text(
                 'Comments',
                 style: TextStyle(
