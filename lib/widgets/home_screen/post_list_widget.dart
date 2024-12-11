@@ -266,7 +266,6 @@ class _PostListWidgetState extends State<PostListWidget> {
                           },
 
                         ),
-                        Text('$shares'),
                       ],
                     ),
                   ],

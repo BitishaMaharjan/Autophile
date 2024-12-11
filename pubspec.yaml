@@ -85,7 +85,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/models/
-    - assets/.env.load
+    - assets/.env
     - assets/images/social_icons/
     - assets/images/autophile_logo/
 
