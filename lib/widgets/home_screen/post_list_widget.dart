@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:autophile/widgets/home_screen/share_option.dart';
 import 'package:timeago/timeago.dart' as timeago;
+
 
 class PostListWidget extends StatefulWidget {
   final List<Map<String, dynamic>> posts;
@@ -243,10 +245,28 @@ class _PostListWidgetState extends State<PostListWidget> {
                       ],
                     ),
 
-                    IconButton(
-                      icon: Icon(Icons.share_outlined),
-                      onPressed: () {
-                      },
+
+                    // Share Button and Count
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.share_outlined, size: 24),
+                          color: Colors.grey,
+                          onPressed: () {
+                           // Replace with dynamic link
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (_) => ShareOptions(
+                              postLink:  "https://autophile.com/path-to-user-image.jpg",
+                              ),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+                              ),
+                            );
+                          },
+
+                        ),
+                      ],
                     ),
                   ],
                 ),
