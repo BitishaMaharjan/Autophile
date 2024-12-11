@@ -52,6 +52,9 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   image_picker: ^1.1.2
   flutter_dotenv: ^5.2.1
+  share_plus: ^10.1.2
+  url_launcher: ^6.3.1
+
 
 
 dev_dependencies:
@@ -82,7 +85,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/models/
-    - assets/.env
+    - assets/.env.load
     - assets/images/social_icons/
     - assets/images/autophile_logo/
 
