@@ -10,6 +10,7 @@ import 'package:autophile/widgets/home_screen/post_list_widget.dart';
 import 'package:autophile/widgets/home_screen/carousel_widget.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:autophile/widgets/loading_skeleton.dart';
 
 class HomeScreen extends StatefulWidget {
   final UserModel? user;
@@ -29,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<String> tags = [];
 
   String? selectedImage;
+  bool isLoading = true;
 
   @override
   void dispose() {
@@ -98,6 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       setState(() {
         posts = fetchedPosts;
+        isLoading = false;
       });
     } catch (error) {
       print('Error fetching posts: $error');
@@ -362,7 +365,9 @@ class _HomeScreenState extends State<HomeScreen> {
             CarouselWidget(carouselItems: carouselItems),
             SizedBox(height: 20),
 
-
+            isLoading
+                ? LoadingSkeleton(isPost:true,isCarSearch:false)
+                :
             PostListWidget(posts: posts),
 
             // Post Section
