@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:autophile/widgets/home_screen/share_option.dart';
 
 class PostListWidget extends StatefulWidget {
   final List<Map<String, String>> posts;
@@ -150,8 +151,18 @@ class _PostListWidgetState extends State<PostListWidget> {
                           icon: Icon(Icons.share_outlined, size: 24),
                           color: Colors.grey,
                           onPressed: () {
-                            // Handle share action
+                           // Replace with dynamic link
+                            showModalBottomSheet(
+                              context: context,
+                              builder: (_) => ShareOptions(
+                              postLink:  "https://autophile.com/path-to-user-image.jpg",
+                              ),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),
+                              ),
+                            );
                           },
+
                         ),
                         Text('$shares'),
                       ],
