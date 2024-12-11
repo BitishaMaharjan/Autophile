@@ -1,5 +1,6 @@
 import 'package:autophile/screens/auth/login_page.dart';
 import 'package:autophile/screens/dashboard/settings_page.dart';
+import 'package:autophile/screens/report_problem.dart';
 import 'package:autophile/themes/theme_provider.dart';
 import 'package:autophile/widgets/app_drawer_tile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -107,7 +108,7 @@ class AppDrawer extends StatelessWidget {
                   AppDrawerTile(
                     text: 'Report a Problem',
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.push(context,MaterialPageRoute(builder: (context)=>ReportProblemScreen()));
                     },
                     icon: Icons.report_problem_rounded,
                   ),
