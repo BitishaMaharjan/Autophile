@@ -9,7 +9,7 @@ class HomeFloatingButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FloatingActionButton(
       onPressed: onPressed,
-      backgroundColor: Theme.of(context).colorScheme.secondary,
+      backgroundColor: Color(0xFF2E3448),
       child: const Icon(Icons.add, color: Colors.white),
     );
   }

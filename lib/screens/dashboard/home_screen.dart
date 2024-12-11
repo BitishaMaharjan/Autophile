@@ -24,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _descriptionController = TextEditingController();
 
   final TextEditingController _tagController = TextEditingController();
+  List<Map<String, dynamic>> posts = [];
 
   List<String> tags = [];
 
@@ -34,6 +35,12 @@ class _HomeScreenState extends State<HomeScreen> {
     _descriptionController.dispose();
     _tagController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchPosts();
   }
 
   void showErrorToast(String message) {
@@ -72,36 +79,30 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   ];
 
-  // Dummy post data
-  final List<Map<String, String>> posts = [
-    {
-      'user': 'Car Guy',
-      'location': 'Monaco, India',
-      'content': 'How much will this cost on average?',
-      'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSO1q5iuu6wJJpVVV5U4Gr_SvpPwdiiYzXGcg&s',
-      'likes': '110',
-      'comments': '3',
-      'shares': '45',
-    },
-    {
-      'user': 'Tech Enthusiast',
-      'location': 'Silicon Valley, USA',
-      'content': 'What is the latest trend in AI technology?',
-      'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcUoJOCMikZl8T5BA16Uqfl-GGcxemCvfbCw&s',
-      'likes': '150',
-      'comments': '5',
-      'shares': '60',
-    },
-    {
-      'user': 'Foodie Explorer',
-      'location': 'Tokyo, Japan',
-      'content': 'Best sushi restaurants in the city?',
-      'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqU0oGGTqnhQAKjtk8ANVPrk6eQH62Cslqrg&s',
-      'likes': '200',
-      'comments': '8',
-      'shares': '75',
-    },
-  ];
+  Future<void> fetchPosts() async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('posts').get();
+      List<Map<String, dynamic>> fetchedPosts = snapshot.docs.map((doc) {
+        return {
+          'caption': doc['caption'] ?? '',
+          'createdAt': doc['createdAt'] ?? '',
+          'dislikes': doc['dislikes'] ?? 0,
+          'image': doc['image'] ?? '',
+          'likes': doc['likes'] ?? 0,
+          'postId': doc.id,
+          'tags': List<String>.from(doc['tags'] ?? []),
+          'userId': doc['userId'] ?? 'Unknown',
+          'comments': 12,
+        };
+      }).toList();
+
+      setState(() {
+        posts = fetchedPosts;
+      });
+    } catch (error) {
+      print('Error fetching posts: $error');
+    }
+  }
 
 
   Future<String> _convertImageToBase64(String imagePath) async {
