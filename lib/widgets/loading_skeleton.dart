@@ -3,7 +3,7 @@ import 'package:shimmer/shimmer.dart';
 
 class LoadingSkeleton extends StatelessWidget {
   final bool isPost;
-  final bool isCarSearch; t
+  final bool isCarSearch;
   final bool? isNotification;
 
   const LoadingSkeleton({

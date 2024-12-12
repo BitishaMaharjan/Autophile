@@ -131,7 +131,7 @@ class _SearchPageState extends State<SearchPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return const MicModal();
+        return MicSearchModal();
       },
     );
   }
