@@ -5,15 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class FavouritePage extends StatefulWidget {
-
-
   @override
   State<FavouritePage> createState() => _FavouritePageState();
 }
 
 class _FavouritePageState extends State<FavouritePage> {
   List<Map<String, dynamic>> posts = [];
-
   bool isLoading = true;
 
   Future<void> fetchPosts() async {
@@ -60,21 +57,16 @@ class _FavouritePageState extends State<FavouritePage> {
       }
     } catch (error) {
       print('Error fetching posts: $error');
+      setState(() {
+        isLoading = false;
+      });
     }
   }
-
-
-
 
   @override
   void initState() {
     super.initState();
     fetchPosts();
-    Future.delayed(Duration(seconds: 2), () {
-      setState(() {
-        isLoading = false;
-      });
-    });
   }
 
   @override
@@ -84,46 +76,75 @@ class _FavouritePageState extends State<FavouritePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
         title: Text(
-          'Your Favourite',
+          'Favourites',
           style: TextStyle(
-            color: Theme.of(context).colorScheme.inversePrimary,
+            color: Theme.of(context).colorScheme.onPrimary,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Theme.of(context).colorScheme.onPrimary),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        elevation: 2,
+        shadowColor: Colors.black12,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        child: isLoading
+            ? Center(
+          child: LoadingSkeleton(isPost: true, isCarSearch: true),
+        )
+            : posts.isEmpty
+            ? _buildEmptyState()
+            : _buildPostList(),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return SingleChildScrollView(
+      child: Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Your Favourite',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.inversePrimary,
-              ),
+            Icon(
+              Icons.favorite_border,
+              size: 80,
+              color: Colors.grey.shade400,
             ),
             SizedBox(height: 16),
-            if (posts.isEmpty)
-              Center(
-                child: Text(
-                  'No favorite posts',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey,
-                  ),
-                ),
-              )
-            else
-              isLoading
-                  ? LoadingSkeleton(isPost: true, isCarSearch: true) // Show loading indicator
-                  : PostListWidget(posts: posts)
+            Text(
+              'No Favourites Yet',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Add posts to your favourites and they will appear here.',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey.shade500,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildPostList() {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: posts.length,
+        itemBuilder: (context, index) {
+          return PostListWidget(posts: posts);
+        },
       ),
     );
   }
