@@ -1,6 +1,10 @@
+import 'package:autophile/core/toast.dart';
 import 'package:autophile/screens/auth/forgot_password.dart';
 import 'package:autophile/widgets/app_button.dart';
+import 'package:bcrypt/bcrypt.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../widgets/app_textfield.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -12,13 +16,63 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final TextEditingController _currentPasswordController = TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
+  final storage = FlutterSecureStorage();
 
-  final _formKey = GlobalKey<FormState>();
+  void _savePassword() async {
+    final userId = await storage.read(key: 'userId');
+    if (userId == null) {
+      ToastUtils.showError("User not found. Please log in again.");
+      return;
+    }
 
-  void _savePassword() {
-    if (_formKey.currentState!.validate()) {
-      // Placeholder for saving the new password
-      print('Password changed successfully');
+    final currentPassword = _currentPasswordController.text.trim();
+    final newPassword = _newPasswordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    if (currentPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
+      ToastUtils.showError("Fields cannot be empty.");
+      return;
+    }
+
+    if (newPassword != confirmPassword) {
+      ToastUtils.showError("New passwords do not match.");
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      ToastUtils.showError("New password must be at least 8 characters long.");
+      return;
+    }
+
+    try {
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (!docSnapshot.exists) {
+        ToastUtils.showError("User not found.");
+        return;
+      }
+
+      final storedHashedPassword = docSnapshot.data()?['password'];
+
+      if (!BCrypt.checkpw(currentPassword, storedHashedPassword)) {
+        ToastUtils.showError("Current password is incorrect.");
+        return;
+      }
+
+      final hashedNewPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .update({'password': hashedNewPassword});
+
+      ToastUtils.showSuccess("Password changed successfully.");
+      Navigator.pop(context);
+    } catch (e) {
+      ToastUtils.showError("Error: ${e.toString()}");
     }
   }
 
@@ -31,9 +85,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
+        child:
+        Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text('Change Password',
@@ -106,7 +159,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
             ],
           ),
-        ),
       ),
     );
   }
