@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:autophile/core/toast.dart';
-import 'package:autophile/screens/Dashboard/base_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:autophile/widgets/home_screen/share_option.dart';
@@ -21,6 +20,7 @@ class PostListWidget extends StatefulWidget {
 }
 
 class _PostListWidgetState extends State<PostListWidget> {
+
   final FlutterSecureStorage storage = FlutterSecureStorage();
 
   Future<bool> checkIfFavorited(String postId) async {
@@ -85,32 +85,31 @@ class _PostListWidgetState extends State<PostListWidget> {
   void _showCommentModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // Allow the modal to take up more space
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Comments', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              SizedBox(height: 10),
-              // Display Comments (for testing purposes, showing multiple comments)
-              CommentWidget(user: 'User1', content: 'This is a comment', upvotes: 5, downvotes: 2),
-              CommentWidget(user: 'User2', content: 'Another interesting comment', upvotes: 3, downvotes: 1),
-              CommentWidget(user: 'User3', content: 'Nice post!', upvotes: 7, downvotes: 0),
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close the comment modal
-                },
-                child: Text('Close'),
-              ),
-            ],
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.7,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 16,
+              right: 16,
+              top: 16,
+            ),
+            child: CommentWidget(
+              username: 'User1',
+              commentText: 'This is a comment',
+              time: '5m ago',
+            ),
           ),
         );
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -372,80 +371,159 @@ class _PostListWidgetState extends State<PostListWidget> {
 }
 
 class CommentWidget extends StatefulWidget {
-  final String user;
-  final String content;
-  final int upvotes;
-  final int downvotes;
+  final String username;
+  final String commentText;
+  final String time;
 
-  CommentWidget({
-    required this.user,
-    required this.content,
-    required this.upvotes,
-    required this.downvotes,
-  });
+  const CommentWidget({
+    required this.username,
+    required this.commentText,
+    required this.time,
+    Key? key,
+  }) : super(key: key);
 
   @override
   _CommentWidgetState createState() => _CommentWidgetState();
 }
 
 class _CommentWidgetState extends State<CommentWidget> {
-  late int upvotes;
-  late int downvotes;
-
-  @override
-  void initState() {
-    super.initState();
-    upvotes = widget.upvotes;
-    downvotes = widget.downvotes;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: NetworkImage('https://via.placeholder.com/60'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () => Navigator.pop(context),
+              ),
+
+              Text(
+                'Comments',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              // Info Icon
+              IconButton(
+                icon: Icon(Icons.info_outline),
+                onPressed: () {
+                },
+              ),
+            ],
+          ),
+        ),
+
+        Divider(height: 1, color: Colors.grey),
+
+        Expanded(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
+              child: Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const CircleAvatar(
+                        radius: 20,
+                        backgroundImage: AssetImage('assets/images/profile _picture.png'),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  widget.username,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  widget.time,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: Theme.of(context).colorScheme.onPrimary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              widget.commentText,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(widget.user, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                Text(widget.content, style: TextStyle(fontSize: 14)),
+          ),
+        ),
+
+        Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: const [
+                Icon(Icons.emoji_emotions_outlined, size: 28),
+                Icon(Icons.sentiment_satisfied_alt, size: 28),
+                Icon(Icons.sentiment_dissatisfied, size: 28),
+                Icon(Icons.sentiment_very_dissatisfied, size: 28),
+                Icon(Icons.sentiment_neutral, size: 28),
+                Icon(Icons.sentiment_very_satisfied, size: 28),
               ],
             ),
-            Spacer(),
-            // Upvote/Downvote for the comment
+            const SizedBox(height: 8),
+
             Row(
               children: [
-
-                IconButton(
-                  icon: Image.asset('assets/icons/upvote.png', width: 20, height: 20),
-                  onPressed: () {
-                    setState(() {
-                      upvotes++;
-                    });
-                  },
+                const CircleAvatar(
+                  radius: 20,
+                  backgroundImage: AssetImage('assets/images/profile _picture.png'),
                 ),
-                Text('$upvotes'),
-                IconButton(
-                  icon: Image.asset('assets/icons/downvote.png', width: 20, height: 20),
-                  onPressed: () {
-                    setState(() {
-                      downvotes++;
-                    });
-                  },
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: "Add a comment...",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide.none,
+                      ),
+                      filled: true,
+                      fillColor: Theme.of(context).colorScheme.surface,
+                    ),
+                  ),
                 ),
-                Text('$downvotes'),
+                const SizedBox(width: 8),
+                IconButton(
+                  onPressed: () {
+                  },
+                  icon: Icon(Icons.send, color: Theme.of(context).colorScheme.onPrimary),
+                ),
               ],
             ),
+            const SizedBox(height: 8),
           ],
         ),
-        Divider(),
       ],
     );
   }
