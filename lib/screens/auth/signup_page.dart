@@ -1,3 +1,4 @@
+import 'package:autophile/core/toast.dart';
 import 'package:autophile/screens/auth/login_page.dart';
 import 'package:autophile/screens/auth/verify_email_page.dart';
 import 'package:autophile/widgets/app_button.dart';
@@ -39,39 +40,28 @@ class _SignupPageState extends State<SignupPage> {
     if(result){
       Navigator.push(context, MaterialPageRoute(builder: (context) => VerifyEmailPage(email: emailController.text)));
     }else{
-      showErrorToast('Something went wrong while sending OTP');
+      ToastUtils.showError('Something went wrong while sending OTP');
     }
   }
 
-  void showErrorToast(String message) {
-    Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.TOP,
-      timeInSecForIosWeb: 2,
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-  }
 
   Future<void> signUp() async {
     if(!_isChecked){
-      showErrorToast('Please agree to user agreement to continue');
+      ToastUtils.showError('Please agree to user agreement to continue');
       return;
     }
     if (!emailRegex.hasMatch(emailController.text)) {
-      showErrorToast('Invalid Email Format');
+      ToastUtils.showError('Invalid Email Format');
       return;
     }
 
     if (passwordController.text != confirmPasswordController.text) {
-      showErrorToast('Password do not match');
+      ToastUtils.showError('Password do not match');
       return;
     }
 
     if (passwordController.text.length < 8) {
-      showErrorToast('Password must be at least 8 characters long');
+      ToastUtils.showError('Password must be at least 8 characters long');
       return;
     }
 
@@ -82,7 +72,7 @@ class _SignupPageState extends State<SignupPage> {
           .get();
 
       if (checkEmail.docs.isNotEmpty) {
-        showErrorToast('Email is already in use');
+        ToastUtils.showError('Email is already in use');
         return;
       }
 
@@ -108,7 +98,7 @@ class _SignupPageState extends State<SignupPage> {
       sendOTP();
     } catch (e) {
       print("Error during signup: $e");
-      showErrorToast(e.toString());
+      ToastUtils.showError(e.toString());
     }
   }
 
