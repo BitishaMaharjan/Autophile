@@ -4,7 +4,7 @@ import 'package:autophile/widgets/profile_header.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import 'package:autophile/widgets/app_drawer.dart';
+
 import 'package:autophile/widgets/saved_photos.dart';
 import 'package:autophile/widgets/loading_skeleton.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -124,7 +124,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             bio: widget.user?.bio?.isEmpty ?? true
                                 ? 'Car Enthusiast'
                                 : widget.user!.bio!,
-                            onEditProfile: () {},
                           ),
                           const SizedBox(height: 26),
                           Row(
