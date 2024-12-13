@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:autophile/widgets/app_drawer.dart';
 import 'package:autophile/widgets/saved_photos.dart';
+import 'package:autophile/widgets/loading_skeleton.dart';
 
 class ProfileScreen extends StatefulWidget {
   final UserModel? user;
@@ -19,27 +20,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool showMyPosts = true;
+  bool isLoading = true; // Loading state variable
 
-  final List<Map<String, String>> posts = [
+  List<Map<String, dynamic>> posts = [
     {
-      'user': 'Car Guy',
-      'location': 'Monaco, India',
-      'content': 'How much will this cost on average?',
-      'image':
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSO1q5iuu6wJJpVVV5U4Gr_SvpPwdiiYzXGcg&s',
-      'likes': '110',
-      'comments': '3',
-      'shares': '45',
+      'caption': 'First post caption goes here.',
+      'createdAt': '2024-12-01T14:30:00Z',
+      'dislikes': 2,
+      'image': 'https://example.com/image1.jpg',
+      'likes': 10,
+      'postId': '1',
+      'tags': ['Flutter', 'Development', 'Programming'],
+      'userId': 'user1',
+      'comments': 4,
     },
     {
-      'user': 'Tech Enthusiast',
-      'location': 'Silicon Valley, USA',
-      'content': 'What is the latest trend in AI technology?',
-      'image':
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcUoJOCMikZl8T5BA16Uqfl-GGcxemCvfbCw&s',
-      'likes': '150',
-      'comments': '5',
-      'shares': '60',
+      'caption': 'Second post caption, a different one.',
+      'createdAt': '2024-12-02T16:15:00Z',
+      'dislikes': 1,
+      'image': 'https://example.com/image2.jpg',
+      'likes': 15,
+      'postId': '2',
+      'tags': ['Tech', 'Flutter', 'Mobile'],
+      'userId': 'user2',
+      'comments': 4,
+    },
+    {
+      'caption': 'Third post with some interesting content.',
+      'createdAt': '2024-12-03T18:00:00Z',
+      'dislikes': 0,
+      'image': 'https://example.com/image3.jpg',
+      'likes': 25,
+      'postId': '3',
+      'tags': ['Technology', 'Innovation', 'Startups', 'Flutter'],
+      'userId': 'user3',
+      'comments': 4,
     },
   ];
 
@@ -71,6 +86,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Simulate loading time
+    Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        isLoading = false; // Data has been loaded
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
@@ -92,14 +118,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(height: 10),
                           ProfileHeader(
                             profileImageUrl:
-                            widget.user?.photo?.isEmpty ?? true ? 'https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png'
+                            widget.user?.photo?.isEmpty ?? true
+                                ? 'https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png'
                                 : widget.user!.photo!,
-                            name:
-                            widget.user?.name?.isEmpty ?? true ? 'User' : widget.user!.name!,
-                            location:
-                            widget.user?.address?.isEmpty ?? true ? 'Earth' : widget.user!.address!,
-                            bio:
-                            widget.user?.bio?.isEmpty ?? true ? 'Car Enthusiast' : widget.user!.bio!,
+                            name: widget.user?.name?.isEmpty ?? true
+                                ? 'User'
+                                : widget.user!.name!,
+                            location: widget.user?.address?.isEmpty ?? true
+                                ? 'Earth'
+                                : widget.user!.address!,
+                            bio: widget.user?.bio?.isEmpty ?? true
+                                ? 'Car Enthusiast'
+                                : widget.user!.bio!,
                             onEditProfile: () {},
                           ),
                           const SizedBox(height: 26),
@@ -148,7 +178,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             thickness: 1,
                           ),
                           const SizedBox(height: 14),
-                          showMyPosts
+                          isLoading
+                              ? LoadingSkeleton(isPost: true, isCarSearch: true) // Show loading indicator
+                              : showMyPosts
                               ? PostListWidget(posts: posts) // My Posts
                               : SavedPhotosWidget(savedPhotos: savedPhotos),
                         ],
