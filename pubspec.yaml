@@ -83,6 +83,8 @@ flutter:
     - assets/models/
     - assets/images/social_icons/
     - assets/images/autophile_logo/
+    - assets/images/ferrari.png
+    - assets/images/main_side_black_shape.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
