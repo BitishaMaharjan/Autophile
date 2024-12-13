@@ -6,6 +6,8 @@ import 'package:autophile/widgets/search_screen/mic_modal.dart';
 import 'package:autophile/widgets/search_screen/car_brand_section.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:autophile/screens/dashboard/search_result.dart';
+import 'package:autophile/services/news_service.dart';
+import 'package:autophile/widgets/loading_skeleton.dart';
 
 class SearchPage extends StatefulWidget {
   @override
@@ -13,6 +15,9 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
+  final NewsService _newsService = NewsService();
+  bool isLoading = true; // To handle the loading state
+  List<Map<String, dynamic>> trendingCars = [];
   FirebaseDatabase database = FirebaseDatabase.instance;
   DatabaseReference ref = FirebaseDatabase.instance.ref();
 
@@ -21,6 +26,38 @@ class _SearchPageState extends State<SearchPage> {
   void initState() {
     super.initState();
     _fetchCarModel();
+    fetchTrendingNews();
+
+  }
+
+
+
+  Future<void> fetchTrendingNews() async {
+    try {
+      final articles = await _newsService.fetchAndStoreCarNews();
+
+      setState(() {
+        trendingCars = articles.map((article) {
+          return {
+            'name': article.title ?? 'No Title Available',
+            'image': article.imageUrl ?? 'https://via.placeholder.com/150',
+            'description': article.description ?? 'No Description Available',
+            'content': article.content ?? 'No content available',
+            'author': article.author ?? 'Unknown Author',
+            'url': article.url ?? 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/BBC_News_2022_%28Alt%29.svg/1024px-BBC_News_2022_%28Alt%29.svg.png', // Ensure URL is not null
+            'publishedAt': article.publishedAt ?? 'Unknown Date',
+          };
+        }).toList();
+
+        isLoading = false;
+      });
+    } catch (e) {
+
+      setState(() {
+        isLoading = false;
+      });
+      print("Error fetching car news: $e");
+    }
   }
 
   // Fetch the data asynchronously
@@ -89,16 +126,12 @@ class _SearchPageState extends State<SearchPage> {
     {'id': 2, 'name': 'Porsche Cayenne', 'price': '15.0', 'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSO1q5iuu6wJJpVVV5U4Gr_SvpPwdiiYzXGcg&s', 'seats': 5},
   ];
 
-  final List<Map<String, dynamic>> trendingCars = [
-    {'id': 1, 'name': 'Car 1', 'description': 'Lorem ipsum dolor sit amet', 'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSO1q5iuu6wJJpVVV5U4Gr_SvpPwdiiYzXGcg&s'},
-    {'id': 2, 'name': 'Car 2', 'description': 'Consectetur adipiscing elit', 'image': 'https://i.imgur.com/9YpgA47.png'},
-  ];
 
   void _openMicModal() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return const MicModal();
+        return MicSearchModal();
       },
     );
   }
@@ -147,7 +180,9 @@ class _SearchPageState extends State<SearchPage> {
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
-                  TrendingNewsList(trendingCars: trendingCars),
+                  isLoading
+                      ? const LoadingSkeleton(isPost:false,isCarSearch: false,) // Show loading spinner if still fetching
+                      : TrendingNewsList(trendingCars: trendingCars), // Show trending cars once data is available
                 ],
               ),
             ],

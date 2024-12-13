@@ -1,10 +1,13 @@
 import 'package:autophile/models/user_model.dart';
 import 'package:autophile/widgets/home_screen/post_list_widget.dart';
 import 'package:autophile/widgets/profile_header.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:autophile/widgets/app_drawer.dart';
 import 'package:autophile/widgets/saved_photos.dart';
+import 'package:autophile/widgets/loading_skeleton.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ProfileScreen extends StatefulWidget {
   final UserModel? user;
@@ -19,29 +22,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool showMyPosts = true;
+  List<Map<String, dynamic>> posts = [];
+  bool isLoading = true;
 
-  final List<Map<String, String>> posts = [
-    {
-      'user': 'Car Guy',
-      'location': 'Monaco, India',
-      'content': 'How much will this cost on average?',
-      'image':
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSO1q5iuu6wJJpVVV5U4Gr_SvpPwdiiYzXGcg&s',
-      'likes': '110',
-      'comments': '3',
-      'shares': '45',
-    },
-    {
-      'user': 'Tech Enthusiast',
-      'location': 'Silicon Valley, USA',
-      'content': 'What is the latest trend in AI technology?',
-      'image':
-      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcUoJOCMikZl8T5BA16Uqfl-GGcxemCvfbCw&s',
-      'likes': '150',
-      'comments': '5',
-      'shares': '60',
-    },
-  ];
+  Future<void> fetchPosts() async {
+    final userId = await FlutterSecureStorage().read(key: 'userId');
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('posts').where('userId',isEqualTo: userId).get();
+      List<Map<String, dynamic>> fetchedPosts = snapshot.docs.map((doc) {
+        return {
+          'caption': doc['caption'] ?? '',
+          'createdAt': doc['createdAt'] ?? '',
+          'dislikes': doc['dislikes'] ?? 0,
+          'image': doc['image'] ?? '',
+          'likes': doc['likes'] ?? 0,
+          'postId': doc.id,
+          'tags': List<String>.from(doc['tags'] ?? []),
+          'userId': doc['userId'] ?? 'Unknown',
+          'comments': 12,
+        };
+      }).toList();
+
+      setState(() {
+        posts = fetchedPosts;
+        isLoading = false;
+      });
+    } catch (error) {
+      print('Error fetching posts: $error');
+    }
+  }
 
   final List<Map<String, String>> savedPhotos = [
     {
@@ -71,6 +80,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    fetchPosts();
+    Future.delayed(Duration(seconds: 2), () {
+      setState(() {
+        isLoading = false; // Data has been loaded
+      });
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
@@ -92,14 +112,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(height: 10),
                           ProfileHeader(
                             profileImageUrl:
-                            widget.user?.photo?.isEmpty ?? true ? 'https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png'
+                            widget.user?.photo?.isEmpty ?? true
+                                ? 'https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png'
                                 : widget.user!.photo!,
-                            name:
-                            widget.user?.name?.isEmpty ?? true ? 'User' : widget.user!.name!,
-                            location:
-                            widget.user?.address?.isEmpty ?? true ? 'Earth' : widget.user!.address!,
-                            bio:
-                            widget.user?.bio?.isEmpty ?? true ? 'Car Enthusiast' : widget.user!.bio!,
+                            name: widget.user?.name?.isEmpty ?? true
+                                ? 'User'
+                                : widget.user!.name!,
+                            location: widget.user?.address?.isEmpty ?? true
+                                ? 'Earth'
+                                : widget.user!.address!,
+                            bio: widget.user?.bio?.isEmpty ?? true
+                                ? 'Car Enthusiast'
+                                : widget.user!.bio!,
                             onEditProfile: () {},
                           ),
                           const SizedBox(height: 26),
@@ -148,9 +172,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             thickness: 1,
                           ),
                           const SizedBox(height: 14),
-                          showMyPosts
-                              ? PostListWidget(posts: posts) // My Posts
-                              : SavedPhotosWidget(savedPhotos: savedPhotos),
+                          isLoading
+                              ? LoadingSkeleton(isPost: true, isCarSearch: true) // Show loading indicator
+                              : PostListWidget(posts: posts)
                         ],
                       ),
                       Positioned(

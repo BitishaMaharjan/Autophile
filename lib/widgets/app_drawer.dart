@@ -1,6 +1,8 @@
 import 'package:autophile/screens/auth/login_page.dart';
+import 'package:autophile/screens/change_password.dart';
 import 'package:autophile/screens/dashboard/settings_page.dart';
 import 'package:autophile/screens/report_problem.dart';
+import 'package:autophile/screens/terms_and%20_policies.dart';
 import 'package:autophile/themes/theme_provider.dart';
 import 'package:autophile/widgets/app_drawer_tile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -81,11 +83,11 @@ class AppDrawer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   AppDrawerTile(
-                    text: 'Language',
+                    text: 'Favourites',
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/favourite');
                     },
-                    icon: Icons.language,
+                    icon: Icons.bookmark,
                   ),
                   AppDrawerTile(
                     text: 'Help & Support',
@@ -101,7 +103,7 @@ class AppDrawer extends StatelessWidget {
                   AppDrawerTile(
                     text: 'Terms and Policies',
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.push(context,MaterialPageRoute(builder: (context)=> TermsAndPoliciesScreen()));
                     },
                     icon: Icons.policy,
                   ),
@@ -115,7 +117,7 @@ class AppDrawer extends StatelessWidget {
                   AppDrawerTile(
                     text: 'Change Password',
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=> ChangePasswordScreen()));
                     },
                     icon: Icons.lock_reset_rounded,
                   ),
