@@ -1,11 +1,13 @@
 import 'package:autophile/models/user_model.dart';
 import 'package:autophile/widgets/home_screen/post_list_widget.dart';
 import 'package:autophile/widgets/profile_header.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:autophile/widgets/app_drawer.dart';
 import 'package:autophile/widgets/saved_photos.dart';
 import 'package:autophile/widgets/loading_skeleton.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ProfileScreen extends StatefulWidget {
   final UserModel? user;
@@ -20,43 +22,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   bool showMyPosts = true;
-  bool isLoading = true; // Loading state variable
+  List<Map<String, dynamic>> posts = [];
+  bool isLoading = true;
 
-  List<Map<String, dynamic>> posts = [
-    {
-      'caption': 'First post caption goes here.',
-      'createdAt': '2024-12-01T14:30:00Z',
-      'dislikes': 2,
-      'image': 'https://example.com/image1.jpg',
-      'likes': 10,
-      'postId': '1',
-      'tags': ['Flutter', 'Development', 'Programming'],
-      'userId': 'user1',
-      'comments': 4,
-    },
-    {
-      'caption': 'Second post caption, a different one.',
-      'createdAt': '2024-12-02T16:15:00Z',
-      'dislikes': 1,
-      'image': 'https://example.com/image2.jpg',
-      'likes': 15,
-      'postId': '2',
-      'tags': ['Tech', 'Flutter', 'Mobile'],
-      'userId': 'user2',
-      'comments': 4,
-    },
-    {
-      'caption': 'Third post with some interesting content.',
-      'createdAt': '2024-12-03T18:00:00Z',
-      'dislikes': 0,
-      'image': 'https://example.com/image3.jpg',
-      'likes': 25,
-      'postId': '3',
-      'tags': ['Technology', 'Innovation', 'Startups', 'Flutter'],
-      'userId': 'user3',
-      'comments': 4,
-    },
-  ];
+  Future<void> fetchPosts() async {
+    final userId = await FlutterSecureStorage().read(key: 'userId');
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('posts').where('userId',isEqualTo: userId).get();
+      List<Map<String, dynamic>> fetchedPosts = snapshot.docs.map((doc) {
+        return {
+          'caption': doc['caption'] ?? '',
+          'createdAt': doc['createdAt'] ?? '',
+          'dislikes': doc['dislikes'] ?? 0,
+          'image': doc['image'] ?? '',
+          'likes': doc['likes'] ?? 0,
+          'postId': doc.id,
+          'tags': List<String>.from(doc['tags'] ?? []),
+          'userId': doc['userId'] ?? 'Unknown',
+          'comments': 12,
+        };
+      }).toList();
+
+      setState(() {
+        posts = fetchedPosts;
+        isLoading = false;
+      });
+    } catch (error) {
+      print('Error fetching posts: $error');
+    }
+  }
 
   final List<Map<String, String>> savedPhotos = [
     {
@@ -88,7 +82,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Simulate loading time
+    fetchPosts();
     Future.delayed(Duration(seconds: 2), () {
       setState(() {
         isLoading = false; // Data has been loaded
@@ -180,9 +174,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(height: 14),
                           isLoading
                               ? LoadingSkeleton(isPost: true, isCarSearch: true) // Show loading indicator
-                              : showMyPosts
-                              ? PostListWidget(posts: posts) // My Posts
-                              : SavedPhotosWidget(savedPhotos: savedPhotos),
+                              : PostListWidget(posts: posts)
                         ],
                       ),
                       Positioned(
