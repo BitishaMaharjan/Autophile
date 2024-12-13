@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:autophile/core/toast.dart';
+import 'package:autophile/screens/Dashboard/base_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:autophile/widgets/home_screen/share_option.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 
@@ -18,7 +21,67 @@ class PostListWidget extends StatefulWidget {
 }
 
 class _PostListWidgetState extends State<PostListWidget> {
-  // Function to show comment modal
+  final FlutterSecureStorage storage = FlutterSecureStorage();
+
+  Future<bool> checkIfFavorited(String postId) async {
+    try {
+      final userId = await storage.read(key: 'userId');
+      final favoritesRef = await FirebaseFirestore.instance
+          .collection('favourites')
+          .where('userId', isEqualTo: userId)
+          .where('postId', isEqualTo: postId)
+          .get();
+
+      return favoritesRef.docs.isNotEmpty;
+    } catch (e) {
+      print("Error checking if post is favorited: $e");
+      return false;
+    }
+  }
+
+  Future<bool> addToFavourite(String postId) async {
+    try {
+      final userId = await storage.read(key: 'userId');
+      if (userId != null) {
+        final favoritesRef = await FirebaseFirestore.instance
+            .collection('favourites')
+            .where('userId', isEqualTo: userId)
+            .where('postId', isEqualTo: postId)
+            .get();
+
+        if (favoritesRef.docs.isNotEmpty) {
+          await favoritesRef.docs.first.reference.delete();
+          ToastUtils.showSuccess('Removed from favorites');
+        } else {
+          final favouriteDocRef = await FirebaseFirestore.instance
+              .collection('favourites')
+              .add({
+            'postId': postId,
+            'userId': userId,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+
+          ToastUtils.showSuccess('Added to favorites');
+          return true;
+        }
+        return true;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please log in to add favorites')),
+        );
+        return false;
+      }
+    } catch (e) {
+      print('Error adding to favorites: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred')),
+      );
+      return false;
+    }
+  }
+
+
+
   void _showCommentModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -155,8 +218,8 @@ class _PostListWidgetState extends State<PostListWidget> {
                         CircleAvatar(
                           radius: 20,
                           backgroundImage: photoUrl == '' ?? true
-                            ? NetworkImage('https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png')
-                            : NetworkImage(photoUrl),
+                              ? NetworkImage('https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png')
+                              : NetworkImage(photoUrl),
 
                           onBackgroundImageError: (_, __) {
                             print('Error loading image');
@@ -181,7 +244,37 @@ class _PostListWidgetState extends State<PostListWidget> {
                             ],
                           ),
                         ),
-                        Icon(Icons.more_vert, color: Colors.grey),
+                        FutureBuilder<bool>(
+                          future: checkIfFavorited(post['postId']),
+                          builder: (context, initialSnapshot) {
+                            bool isFavorited = initialSnapshot.data ?? false;
+
+                            return StatefulBuilder(
+                              builder: (context, setLocalState) {
+                                return IconButton(
+                                  icon: Icon(
+                                    isFavorited ? Icons.bookmark : Icons.bookmark_border,
+                                    color: isFavorited ? Colors.orange : Colors.grey,
+                                  ),
+                                  onPressed: () async {
+                                    setLocalState(() {
+                                      isFavorited = !isFavorited;
+                                    });
+
+                                    try {
+                                      await addToFavourite(post['postId']);
+                                    } catch (e) {
+                                      setLocalState(() {
+                                        isFavorited = !isFavorited;
+                                      });
+                                      print('Error toggling favorite: $e');
+                                    }
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        )
                       ],
                     );
                   },
@@ -216,7 +309,7 @@ class _PostListWidgetState extends State<PostListWidget> {
                     Row(
                       children: [
                         IconButton(
-                          icon: Icon(Icons.thumb_up_outlined),
+                          icon: Image.asset('assets/icons/upvote.png'),
                           onPressed: () {
                           },
                         ),
@@ -227,7 +320,7 @@ class _PostListWidgetState extends State<PostListWidget> {
                     Row(
                       children: [
                         IconButton(
-                          icon: Icon(Icons.thumb_down_outlined),
+                          icon: Image.asset('assets/icons/downvote.png'),
                           onPressed: () {
                           },
                         ),
@@ -253,11 +346,10 @@ class _PostListWidgetState extends State<PostListWidget> {
                           icon: Icon(Icons.share_outlined, size: 24),
                           color: Colors.grey,
                           onPressed: () {
-                           // Replace with dynamic link
                             showModalBottomSheet(
                               context: context,
                               builder: (_) => ShareOptions(
-                              postLink:  "https://autophile.com/path-to-user-image.jpg",
+                                postLink:  "https://autophile.com/path-to-user-image.jpg",
                               ),
                               shape: const RoundedRectangleBorder(
                                 borderRadius: BorderRadius.vertical(top: Radius.circular(16.0)),

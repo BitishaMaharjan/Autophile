@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class PostModel {
   final String? postId;
   final String caption;
@@ -42,5 +44,21 @@ class PostModel {
       'likes': likes,
       'dislikes': dislikes,
     };
+  }
+
+  // Method to update likes count
+  Future<void> updateLikesCount(int change, String postId) async {
+    final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+    await postRef.update({
+      'likes': FieldValue.increment(change),
+    });
+  }
+
+  // Method to update dislikes count
+  Future<void> updateDislikesCount(int change, String postId) async {
+    final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+    await postRef.update({
+      'dislikes': FieldValue.increment(change),
+    });
   }
 }

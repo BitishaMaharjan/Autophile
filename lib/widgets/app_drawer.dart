@@ -80,11 +80,11 @@ class AppDrawer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   AppDrawerTile(
-                    text: 'Language',
+                    text: 'Favourites',
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.pushNamed(context, '/favourite');
                     },
-                    icon: Icons.language,
+                    icon: Icons.bookmark,
                   ),
                   AppDrawerTile(
                     text: 'Help & Support',
