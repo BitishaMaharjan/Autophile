@@ -174,19 +174,54 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Add a Tag"),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.tag, color: Theme.of(context).colorScheme.onTertiary),
+            const SizedBox(width: 20),
+            Text(
+              "Add a Tag",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+          ],
+        ),
         content: TextField(
           controller: _tagController,
-          decoration: const InputDecoration(hintText: "Enter tag"),
+          decoration: InputDecoration(
+            hintText: "Enter tag name...",
+            prefixIcon: Icon(Icons.edit, color: Theme.of(context).colorScheme.onTertiary),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+            ),
+
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Cancel",style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary),),
+            child: Text(
+              "Cancel",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.tertiary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
-          ElevatedButton(
+          ElevatedButton.icon(
             onPressed: _addTag,
-            child: Text("Add",style: TextStyle(color: Theme.of(context).colorScheme.inversePrimary),),
+            label: const Text("Add"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.tertiary,
+              foregroundColor: Theme.of(context).colorScheme.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
         ],
       ),
@@ -197,56 +232,83 @@ class _HomeScreenState extends State<HomeScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).colorScheme.primary,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
       builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        maxChildSize: 0.9,
-        minChildSize: 0.5,
+        initialChildSize: 0.8,
+        maxChildSize: 0.95,
+        minChildSize: 0.6,
         expand: false,
         builder: (context, scrollController) => SingleChildScrollView(
           controller: scrollController,
           child: Padding(
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 16,
-              right: 16,
-              top: 16,
+              left: 24,
+              right: 24,
+              top: 20,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  "Create Post",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                Center(
+                  child: Container(
+                    width: 60,
+                    height: 5,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                Center(
+                  child: Text(
+                    "Create New Post",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Description Field
                 TextField(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(
-                    hintText: "Write something...",
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    hintText: "What's on your mind?",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary),
+                    ),
                   ),
                   maxLines: 4,
                 ),
-                const SizedBox(height: 16),
-                const Text(
+                const SizedBox(height: 20),
+
+                // Tags Section
+                Text(
                   "Tags",
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
+                  runSpacing: 8,
                   children: [
                     ...tags.map(
                           (tag) => Chip(
-                        label: Text(tag),
-                        deleteIcon: const Icon(Icons.close, size: 18),
+                        label: Text(tag, style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer)),
+                        backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                        deleteIcon: Icon(Icons.close, size: 18, color: Theme.of(context).colorScheme.error),
                         onDeleted: () {
                           setState(() {
                             tags.remove(tag);
@@ -256,60 +318,79 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     ActionChip(
                       label: const Text("Add Tag"),
-                      avatar: const Icon(Icons.add),
+                      avatar: Icon(Icons.add, color: Theme.of(context).colorScheme.primary),
                       onPressed: _showAddTagDialog,
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                const Text(
-                  "Image",
-                  style: TextStyle(fontWeight: FontWeight.bold),
+                const SizedBox(height: 20),
+
+                // Image Picker Section
+                Text(
+                  "Add Image",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Theme.of(context).colorScheme.inversePrimary,
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: _pickImage,
-                      child: Container(
-                        width: 100,
-                        height: 100,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: selectedImage != null
-                            ? Image.file(
+                const SizedBox(height: 12),
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: Center(
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        border: Border.all(color: Theme.of(context).colorScheme.outline),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: selectedImage != null
+                          ? ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.file(
                           File(selectedImage!),
                           fit: BoxFit.cover,
-                        )
-                            : const Icon(Icons.add_a_photo, size: 40),
+                        ),
+                      )
+                          : Icon(Icons.add_a_photo, size: 50, color: Theme.of(context).colorScheme.inversePrimary),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                // Action Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => Navigator.pop(context),
+                      label: const Text("Cancel"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.tertiary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 10,),
+                    ElevatedButton.icon(
+                      onPressed: _createPost,
+                      label: const Text("Post"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.tertiary,
+                        foregroundColor: Theme.of(context).colorScheme.primary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text("Cancel",
-                        style: TextStyle(color: Theme.of(context).colorScheme.secondary),),
-                    ),
-                    const SizedBox(width: 16),
-                    GestureDetector(
-                      onTap: _createPost,
-                      child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.all(Radius.circular(10)),
-                              color: Theme.of(context).colorScheme.secondary
-                          ),
-                          child: Text("Post",style: TextStyle(color: Theme.of(context).colorScheme.primary),)),
-                    ),
-                  ],
-                ),
+
               ],
             ),
           ),
@@ -317,6 +398,8 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
