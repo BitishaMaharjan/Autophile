@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:autophile/widgets/home_screen/share_option.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:autophile/models/comment_model.dart';
 
 
 class PostListWidget extends StatefulWidget {
@@ -18,37 +19,36 @@ class PostListWidget extends StatefulWidget {
 }
 
 class _PostListWidgetState extends State<PostListWidget> {
-  // Function to show comment modal
-  void _showCommentModal(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // Allow the modal to take up more space
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Comments', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              SizedBox(height: 10),
-              // Display Comments (for testing purposes, showing multiple comments)
-              CommentWidget(user: 'User1', content: 'This is a comment', upvotes: 5, downvotes: 2),
-              CommentWidget(user: 'User2', content: 'Another interesting comment', upvotes: 3, downvotes: 1),
-              CommentWidget(user: 'User3', content: 'Nice post!', upvotes: 7, downvotes: 0),
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close the comment modal
-                },
-                child: Text('Close'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
+  // void _showCommentModal(BuildContext context) {
+  //   showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     shape: RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  //     ),
+  //     builder: (context) {
+  //       return FractionallySizedBox(
+  //         heightFactor: 0.7,
+  //         child: Padding(
+  //           padding: EdgeInsets.only(
+  //             bottom: MediaQuery.of(context).viewInsets.bottom,
+  //             left: 16,
+  //             right: 16,
+  //             top: 16,
+  //           ),
+  //           child: CommentWidget(
+  //             username: 'User1',
+  //             commentText: 'This is a comment',
+  //             time: '5m ago',
+  //             onRespond: () {
+  //               print('Respond tapped');
+  //             },
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
   @override
   Widget build(BuildContext context) {
 
@@ -147,6 +147,7 @@ class _PostListWidgetState extends State<PostListWidget> {
                     }
 
                     final userData = snapshot.data?.data() as Map<String, dynamic>?;
+                    final userId = userData?['userId'];
                     final username = userData?['name'] ?? 'Unknown User';
                     final photoUrl = userData?['photo'] ?? '';
 
@@ -239,7 +240,21 @@ class _PostListWidgetState extends State<PostListWidget> {
                       children: [
                         IconButton(
                           icon: Icon(Icons.chat_bubble_outline),
-                          onPressed: () => _showCommentModal(context),
+                          onPressed: (){
+                        showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                        ),
+                        builder: (context) {
+                        return FractionallySizedBox(
+                        heightFactor: 0.7, // Adjust the height as needed
+                        child: CommentWidget(postId: post['postId'], userId : post['userId'] ),
+                        );
+                        },
+                        );
+                        }
                         ),
                         Text('$comments'),
                       ],
@@ -279,81 +294,137 @@ class _PostListWidgetState extends State<PostListWidget> {
   }
 }
 
-class CommentWidget extends StatefulWidget {
-  final String user;
-  final String content;
-  final int upvotes;
-  final int downvotes;
 
-  CommentWidget({
-    required this.user,
-    required this.content,
-    required this.upvotes,
-    required this.downvotes,
-  });
+// Widget to display and add comments for a specific post.
+class CommentWidget extends StatefulWidget {
+  final String postId;
+  final String userId;
+
+  const CommentWidget({required this.postId, required this.userId, Key? key}) : super(key: key);
 
   @override
   _CommentWidgetState createState() => _CommentWidgetState();
 }
 
 class _CommentWidgetState extends State<CommentWidget> {
-  late int upvotes;
-  late int downvotes;
+  final TextEditingController _commentController = TextEditingController();
+  bool _isSending = false;
+  List<CommentModel> _comments = [];
 
-  @override
-  void initState() {
-    super.initState();
-    upvotes = widget.upvotes;
-    downvotes = widget.downvotes;
+  Future<void> _addComment(String text) async {
+    setState(() {
+      _isSending = true;
+    });
+
+    try {
+      final userId = widget.userId;
+      final commentId = FirebaseFirestore.instance.collection('comments').doc().id;
+
+      final comment = CommentModel(
+        commentId: commentId,
+        postId: widget.postId,
+        userId: userId,
+        text: text,
+        createdAt: DateTime.now(),
+      );
+
+      // Temporarily add the comment to the list before saving it
+      setState(() {
+        _comments.insert(0, comment);
+      });
+
+      await FirebaseFirestore.instance
+          .collection('comments')
+          .doc(commentId)
+          .set(comment.toJson());
+
+      _commentController.clear();
+    } catch (e) {
+      print("Error adding comment: $e");
+    } finally {
+      setState(() {
+        _isSending = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: NetworkImage('https://via.placeholder.com/60'),
-            ),
-            SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(widget.user, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                Text(widget.content, style: TextStyle(fontSize: 14)),
-              ],
-            ),
-            Spacer(),
-            // Upvote/Downvote for the comment
-            Row(
-              children: [
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
 
-                IconButton(
-                  icon: Image.asset('assets/icons/upvote.png', width: 20, height: 20),
-                  onPressed: () {
-                    setState(() {
-                      upvotes++;
-                    });
-                  },
-                ),
-                Text('$upvotes'),
-                IconButton(
-                  icon: Image.asset('assets/icons/downvote.png', width: 20, height: 20),
-                  onPressed: () {
-                    setState(() {
-                      downvotes++;
-                    });
-                  },
-                ),
-                Text('$downvotes'),
-              ],
-            ),
-          ],
+            stream: FirebaseFirestore.instance
+                .collection('comments')
+                .where('postId', isEqualTo: widget.postId)
+                .orderBy('createdAt', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                print(snapshot.data!.docs.map((e) => e.data()).toList());
+              }
+
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Center(child: Text("No comments yet"));
+              }
+
+              final comments = snapshot.data!.docs.map((doc) {
+                return CommentModel.fromSnapshot(
+                  doc.id,
+                  doc.data() as Map<String, dynamic>,
+                );
+              }).toList();
+
+              return ListView.builder(
+                itemCount: comments.length,
+                itemBuilder: (context, index) {
+                  final comment = comments[index];
+                  return ListTile(
+                    title: Text(comment.text),
+                    subtitle: Text("By ${comment.userId} - ${comment.createdAt.toLocal().toString()}"),
+                  );
+                },
+              );
+            },
+          ),
         ),
-        Divider(),
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _commentController,
+                  decoration: InputDecoration(
+                    hintText: "Add a comment...",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                  ),
+                ),
+              ),
+              IconButton(
+                icon: _isSending
+                    ? CircularProgressIndicator()
+                    : Icon(Icons.send),
+                onPressed: _isSending
+                    ? null
+                    : () {
+                  if (_commentController.text.trim().isNotEmpty) {
+                    _addComment(_commentController.text.trim());
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
