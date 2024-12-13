@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:autophile/models/post_model.dart';
 import 'package:autophile/models/user_model.dart';
 import 'package:autophile/widgets/home_screen/home_floating_button.dart';
@@ -67,19 +66,6 @@ class _HomeScreenState extends State<HomeScreen> {
       fontSize: 16.0,
     );
   }
-
-  final List<Map<String, String>> carouselItems = [
-    {
-      'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQsn3IBz0b-p2TsmIxg4IXXstEaYLGXquVHMg&s',
-      'title': 'Taste the Classy with our New Tesla Model',
-      'subtitle': 'Extra offer for Exclusive Members'
-    },
-    {
-      'image': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPY2FtV2YZruYLotHOJ4KZ8uNTplcwxye9ww&s',
-      'title': ' New Tesla Model Taste the Classy with our',
-      'subtitle': 'Extra offer for Exclusive Members'
-    }
-  ];
 
   Future<void> fetchPosts() async {
     try {
@@ -362,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
             SizedBox(height: 4),
-            CarouselWidget(carouselItems: carouselItems),
+            CarouselWidget(),
             SizedBox(height: 20),
 
             isLoading

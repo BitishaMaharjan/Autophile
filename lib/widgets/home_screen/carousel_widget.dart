@@ -1,23 +1,108 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CarouselWidget extends StatefulWidget {
-  final List<Map<String, String>> carouselItems;
-
-  const CarouselWidget({required this.carouselItems});
+  const CarouselWidget({Key? key}) : super(key: key);
 
   @override
   _CarouselWidgetState createState() => _CarouselWidgetState();
 }
 
 class _CarouselWidgetState extends State<CarouselWidget> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<Map<String, String>> _carouselItems = [];
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCarouselItems();
+  }
+
+  Future<void> _fetchCarouselItems() async {
+    try {
+      final snapshot = await _firestore.collection('carouselItems').get();
+      setState(() {
+        _carouselItems = snapshot.docs.map((doc) {
+          final data = doc.data();
+          return {
+            'title': data['title']?.toString() ?? '',
+            'subtitle': data['subtitle']?.toString() ?? '',
+            'image': data['image']?.toString() ?? '',
+          };
+        }).toList();
+      });
+    } catch (error) {
+      print('Error fetching carousel items: $error');
+    }
+  }
+
+  Future<void> _addCarouselItem(Map<String, String> item) async {
+    try {
+      await _firestore.collection('carouselItems').add(item);
+      _fetchCarouselItems();
+    } catch (error) {
+      print('Error adding carousel item: $error');
+    }
+  }
+
+  void _showAddItemModal() {
+    final titleController = TextEditingController();
+    final subtitleController = TextEditingController();
+    final imageController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add Carousel Item'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(labelText: 'Title'),
+                ),
+                TextField(
+                  controller: subtitleController,
+                  decoration: const InputDecoration(labelText: 'Subtitle'),
+                ),
+                TextField(
+                  controller: imageController,
+                  decoration: const InputDecoration(labelText: 'Image URL'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                final newItem = {
+                  'title': titleController.text,
+                  'subtitle': subtitleController.text,
+                  'image': imageController.text,
+                };
+                _addCarouselItem(newItem);
+                Navigator.of(context).pop();
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        // Carousel slider
+
         CarouselSlider(
           options: CarouselOptions(
             height: 170,
@@ -26,18 +111,18 @@ class _CarouselWidgetState extends State<CarouselWidget> {
             aspectRatio: 16 / 9,
             viewportFraction: 0.9,
             enableInfiniteScroll: true,
-            autoPlayInterval: Duration(seconds: 5),
+            autoPlayInterval: const Duration(seconds: 5),
             onPageChanged: (index, reason) {
               setState(() {
                 _currentIndex = index;
               });
             },
           ),
-          items: widget.carouselItems.map((item) {
+          items: _carouselItems.map((item) {
             return Builder(
               builder: (BuildContext context) {
                 return Container(
-                  padding: EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
                     borderRadius: BorderRadius.circular(15),
@@ -51,7 +136,6 @@ class _CarouselWidgetState extends State<CarouselWidget> {
                   ),
                   child: Stack(
                     children: [
-                      // Car image as background
                       ClipRRect(
                         borderRadius: BorderRadius.circular(15),
                         child: Image.network(
@@ -63,19 +147,18 @@ class _CarouselWidgetState extends State<CarouselWidget> {
                             if (progress == null) {
                               return child;
                             } else {
-                              return Center(
+                              return const Center(
                                 child: CircularProgressIndicator(),
                               );
                             }
                           },
                           errorBuilder: (context, error, stackTrace) {
-                            return Center(
+                            return const Center(
                               child: Icon(Icons.error, color: Colors.red),
                             );
                           },
                         ),
                       ),
-                      // Text overlay
                       Positioned(
                         left: 10,
                         bottom: 10,
@@ -84,16 +167,16 @@ class _CarouselWidgetState extends State<CarouselWidget> {
                           children: [
                             Text(
                               item['title']!,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
-                            SizedBox(height: 5),
+                            const SizedBox(height: 5),
                             Text(
                               item['subtitle']!,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.white,
                               ),
@@ -108,19 +191,18 @@ class _CarouselWidgetState extends State<CarouselWidget> {
             );
           }).toList(),
         ),
-        // Dots indicator
         Positioned(
           bottom: 10,
           left: 0,
           right: 0,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: widget.carouselItems.asMap().entries.map((entry) {
+            children: _carouselItems.asMap().entries.map((entry) {
               return AnimatedContainer(
-                duration: Duration(milliseconds: 300),
+                duration: const Duration(milliseconds: 300),
                 width: _currentIndex == entry.key ? 12.0 : 8.0,
                 height: 8.0,
-                margin: EdgeInsets.symmetric(horizontal: 4.0),
+                margin: const EdgeInsets.symmetric(horizontal: 4.0),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: _currentIndex == entry.key
@@ -131,6 +213,9 @@ class _CarouselWidgetState extends State<CarouselWidget> {
             }).toList(),
           ),
         ),
+        ElevatedButton.icon(onPressed: () => _showAddItemModal(),
+          icon: const Icon(Icons.message),
+          label: const Text('Add Item'),),
       ],
     );
   }
