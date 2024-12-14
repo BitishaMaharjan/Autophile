@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:autophile/core/toast.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:autophile/widgets/home_screen/share_option.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:autophile/models/comment_model.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 
 class PostListWidget extends StatefulWidget {
@@ -20,96 +20,6 @@ class PostListWidget extends StatefulWidget {
 }
 
 class _PostListWidgetState extends State<PostListWidget> {
-
-  final FlutterSecureStorage storage = FlutterSecureStorage();
-
-  Future<bool> checkIfFavorited(String postId) async {
-    try {
-      final userId = await storage.read(key: 'userId');
-      final favoritesRef = await FirebaseFirestore.instance
-          .collection('favourites')
-          .where('userId', isEqualTo: userId)
-          .where('postId', isEqualTo: postId)
-          .get();
-
-      return favoritesRef.docs.isNotEmpty;
-    } catch (e) {
-      print("Error checking if post is favorited: $e");
-      return false;
-    }
-  }
-
-  Future<bool> addToFavourite(String postId) async {
-    try {
-      final userId = await storage.read(key: 'userId');
-      if (userId != null) {
-        final favoritesRef = await FirebaseFirestore.instance
-            .collection('favourites')
-            .where('userId', isEqualTo: userId)
-            .where('postId', isEqualTo: postId)
-            .get();
-
-        if (favoritesRef.docs.isNotEmpty) {
-          await favoritesRef.docs.first.reference.delete();
-          ToastUtils.showSuccess('Removed from favorites');
-        } else {
-          final favouriteDocRef = await FirebaseFirestore.instance
-              .collection('favourites')
-              .add({
-            'postId': postId,
-            'userId': userId,
-            'createdAt': FieldValue.serverTimestamp(),
-          });
-
-          ToastUtils.showSuccess('Added to favorites');
-          return true;
-        }
-        return true;
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please log in to add favorites')),
-        );
-        return false;
-      }
-    } catch (e) {
-      print('Error adding to favorites: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred')),
-      );
-      return false;
-    }
-  }
-
-
-
-  void _showCommentModal(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return FractionallySizedBox(
-          heightFactor: 0.7,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 16,
-              right: 16,
-              top: 16,
-            ),
-            child: CommentWidget(
-              username: 'User1',
-              commentText: 'This is a comment',
-              time: '5m ago',
-            ),
-          ),
-        );
-      },
-    );
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -209,6 +119,7 @@ class _PostListWidgetState extends State<PostListWidget> {
                     }
 
                     final userData = snapshot.data?.data() as Map<String, dynamic>?;
+                    final userId = userData?['userId'];
                     final username = userData?['name'] ?? 'Unknown User';
                     final photoUrl = userData?['photo'] ?? '';
 
@@ -243,37 +154,7 @@ class _PostListWidgetState extends State<PostListWidget> {
                             ],
                           ),
                         ),
-                        FutureBuilder<bool>(
-                          future: checkIfFavorited(post['postId']),
-                          builder: (context, initialSnapshot) {
-                            bool isFavorited = initialSnapshot.data ?? false;
-
-                            return StatefulBuilder(
-                              builder: (context, setLocalState) {
-                                return IconButton(
-                                  icon: Icon(
-                                    isFavorited ? Icons.bookmark : Icons.bookmark_border,
-                                    color: isFavorited ? Colors.orange : Colors.grey,
-                                  ),
-                                  onPressed: () async {
-                                    setLocalState(() {
-                                      isFavorited = !isFavorited;
-                                    });
-
-                                    try {
-                                      await addToFavourite(post['postId']);
-                                    } catch (e) {
-                                      setLocalState(() {
-                                        isFavorited = !isFavorited;
-                                      });
-                                      print('Error toggling favorite: $e');
-                                    }
-                                  },
-                                );
-                              },
-                            );
-                          },
-                        )
+                        Icon(Icons.more_vert, color: Colors.grey),
                       ],
                     );
                   },
@@ -308,7 +189,7 @@ class _PostListWidgetState extends State<PostListWidget> {
                     Row(
                       children: [
                         IconButton(
-                          icon: Image.asset('assets/icons/upvote.png'),
+                          icon: Icon(Icons.thumb_up_outlined),
                           onPressed: () {
                           },
                         ),
@@ -319,7 +200,7 @@ class _PostListWidgetState extends State<PostListWidget> {
                     Row(
                       children: [
                         IconButton(
-                          icon: Image.asset('assets/icons/downvote.png'),
+                          icon: Icon(Icons.thumb_down_outlined),
                           onPressed: () {
                           },
                         ),
@@ -330,8 +211,22 @@ class _PostListWidgetState extends State<PostListWidget> {
                     Row(
                       children: [
                         IconButton(
-                          icon: Icon(Icons.chat_bubble_outline),
-                          onPressed: () => _showCommentModal(context),
+                            icon: Icon(Icons.chat_bubble_outline),
+                            onPressed: (){
+                              showModalBottomSheet(
+                                context: context,
+                                isScrollControlled: true,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                ),
+                                builder: (context) {
+                                  return FractionallySizedBox(
+                                    heightFactor: 0.7, // Adjust the height as needed
+                                    child: CommentWidget(postId: post['postId']),
+                                  );
+                                },
+                              );
+                            }
                         ),
                         Text('$comments'),
                       ],
@@ -345,6 +240,7 @@ class _PostListWidgetState extends State<PostListWidget> {
                           icon: Icon(Icons.share_outlined, size: 24),
                           color: Colors.grey,
                           onPressed: () {
+                            // Replace with dynamic link
                             showModalBottomSheet(
                               context: context,
                               builder: (_) => ShareOptions(
@@ -371,26 +267,58 @@ class _PostListWidgetState extends State<PostListWidget> {
 }
 
 class CommentWidget extends StatefulWidget {
-  final String username;
-  final String commentText;
-  final String time;
+  final String postId;
 
-  const CommentWidget({
-    required this.username,
-    required this.commentText,
-    required this.time,
-    Key? key,
-  }) : super(key: key);
+  const CommentWidget({required this.postId, Key? key}) : super(key: key);
 
   @override
   _CommentWidgetState createState() => _CommentWidgetState();
 }
 
 class _CommentWidgetState extends State<CommentWidget> {
+  final TextEditingController _commentController = TextEditingController();
+  bool _isSending = false;
+  final storage = FlutterSecureStorage();
+
+  Future<void> _addComment(String text) async {
+    if (text.isEmpty) return;
+
+    setState(() {
+      _isSending = true;
+    });
+
+    try {
+      final userId = await storage.read(key: 'userId');
+      final commentId = FirebaseFirestore.instance.collection('comments').doc().id;
+
+      final comment = CommentModel(
+        commentId: commentId,
+        postId: widget.postId,
+        userId: userId!,
+        text: text,
+        createdAt: DateTime.now(),
+      );
+
+      await FirebaseFirestore.instance
+          .collection('comments')
+          .doc(commentId)
+          .set(comment.toJson());
+
+      _commentController.clear();
+    } catch (e) {
+      print("Error adding comment: $e");
+    } finally {
+      setState(() {
+        _isSending = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Header
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
           child: Row(
@@ -400,7 +328,6 @@ class _CommentWidgetState extends State<CommentWidget> {
                 icon: Icon(Icons.arrow_back),
                 onPressed: () => Navigator.pop(context),
               ),
-
               Text(
                 'Comments',
                 style: TextStyle(
@@ -408,100 +335,131 @@ class _CommentWidgetState extends State<CommentWidget> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              // Info Icon
               IconButton(
                 icon: Icon(Icons.info_outline),
-                onPressed: () {
-                },
+                onPressed: () {},
               ),
             ],
           ),
         ),
-
         Divider(height: 1, color: Colors.grey),
 
+        // Comments List
         Expanded(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20.0),
-              child: Column(
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const CircleAvatar(
-                        radius: 20,
-                        backgroundImage: AssetImage('assets/images/profile _picture.png'),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  widget.username,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  widget.time,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w400,
-                                    color: Theme.of(context).colorScheme.onPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              widget.commentText,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('comments')
+                .where('postId', isEqualTo: widget.postId)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
 
-                          ],
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Center(child: Text("No comments yet"));
+              }
+
+              final comments = snapshot.data!.docs.map((doc) {
+                return CommentModel.fromSnapshot(
+                  doc.id,
+                  doc.data() as Map<String, dynamic>,
+                );
+              }).toList();
+
+              return ListView.builder(
+                itemCount: comments.length,
+                itemBuilder: (context, index) {
+                  final comment = comments[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        StreamBuilder<DocumentSnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(comment.userId)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return CircleAvatar(
+                                radius: 20,
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+
+                            final userData = snapshot.data?.data() as Map<String, dynamic>?;
+                            final username = userData?['name'] ?? 'Unknown User';
+                            final photoUrl = userData?['photo'] ?? '';
+
+                            return CircleAvatar(
+                              radius: 20,
+                              backgroundImage: photoUrl.isNotEmpty
+                                  ? NetworkImage(photoUrl)
+                                  : AssetImage('assets/images/profile_picture.png') as ImageProvider,
+                            );
+                          },
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    comment.userId, // Replace with actual username fetching logic
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    timeago.format(comment.createdAt),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w400,
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                comment.text,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
           ),
         ),
 
+        // Comment Input
         Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: const [
-                Icon(Icons.emoji_emotions_outlined, size: 28),
-                Icon(Icons.sentiment_satisfied_alt, size: 28),
-                Icon(Icons.sentiment_dissatisfied, size: 28),
-                Icon(Icons.sentiment_very_dissatisfied, size: 28),
-                Icon(Icons.sentiment_neutral, size: 28),
-                Icon(Icons.sentiment_very_satisfied, size: 28),
-              ],
-            ),
             const SizedBox(height: 8),
-
             Row(
               children: [
                 const CircleAvatar(
                   radius: 20,
-                  backgroundImage: AssetImage('assets/images/profile _picture.png'),
+                  backgroundImage: AssetImage('assets/images/profile_picture.png'),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: TextField(
+                    controller: _commentController,
                     decoration: InputDecoration(
                       hintText: "Add a comment...",
                       border: OutlineInputBorder(
@@ -515,8 +473,9 @@ class _CommentWidgetState extends State<CommentWidget> {
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  onPressed: () {
-                  },
+                  onPressed: _isSending
+                      ? null
+                      : () => _addComment(_commentController.text.trim()),
                   icon: Icon(Icons.send, color: Theme.of(context).colorScheme.onPrimary),
                 ),
               ],
@@ -528,3 +487,16 @@ class _CommentWidgetState extends State<CommentWidget> {
     );
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
