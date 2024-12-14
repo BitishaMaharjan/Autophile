@@ -7,8 +7,8 @@ class PostModel {
   final String image;
   final String userId;
   final DateTime createdAt;
-  final int likes;
-  final int dislikes;
+  final int upvote;
+  final int downvote;
 
   const PostModel({
     this.postId,
@@ -17,8 +17,8 @@ class PostModel {
     required this.image,
     required this.userId,
     required this.createdAt,
-    this.likes = 0,
-    this.dislikes = 0,
+    this.upvote = 0,
+    this.downvote = 0,
   });
 
   factory PostModel.fromSnapshot(String postId, Map<String, dynamic> data) {
@@ -29,8 +29,8 @@ class PostModel {
       image: data['image'] as String,
       userId: data['userId'] as String,
       createdAt: DateTime.parse(data['createdAt'] as String),
-      likes: data['likes'] ?? 0,
-      dislikes: data['dislikes'] ?? 0,
+      upvote: data['upvote'] ?? 0,
+      downvote: data['downvote'] ?? 0,
     );
   }
 
@@ -41,24 +41,36 @@ class PostModel {
       'image': image,
       'userId': userId,
       'createdAt': createdAt.toIso8601String(),
-      'likes': likes,
-      'dislikes': dislikes,
+      'upvote': upvote,
+      'downvote': downvote,
     };
   }
 
-  // Method to update likes count
-  Future<void> updateLikesCount(int change, String postId) async {
+  Future<void> increaseUpvoteCount(String postId) async {
     final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
     await postRef.update({
-      'likes': FieldValue.increment(change),
+      'upvote': FieldValue.increment(1),
     });
   }
 
-  // Method to update dislikes count
-  Future<void> updateDislikesCount(int change, String postId) async {
+  Future<void> increaseDownvoteCount(String postId) async {
     final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
     await postRef.update({
-      'dislikes': FieldValue.increment(change),
+      'downvote': FieldValue.increment(1),
+    });
+  }
+
+  Future<void> decreaseUpvoteCount(String postId) async {
+    final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+    await postRef.update({
+      'upvote': FieldValue.increment(-1),
+    });
+  }
+
+  Future<void> decreaseDownvoteCount(String postId) async {
+    final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+    await postRef.update({
+      'downvote': FieldValue.increment(-1),
     });
   }
 }
