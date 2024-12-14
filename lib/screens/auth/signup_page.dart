@@ -398,8 +398,8 @@ class _SignupPageState extends State<SignupPage> {
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: 400, // Set a maximum width
-              maxHeight: 600, // Set a maximum height
+              maxWidth: 400,
+              maxHeight: 600,
             ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
