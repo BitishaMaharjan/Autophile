@@ -1,8 +1,8 @@
-0 Suzuki swift 2018
-1 Hyndai Tucso
-2 Honda CR-V
-3 KIA Soul
-4 Tesla Model X
-5 Toyota Corolla 2004
-6 Mercedes-Benz GLC
-7 Ferrari 488
+0 Toyota Innova
+1 Audi
+2 Mahindra Scorpio
+3 Rolls Royce
+4 Swift
+5 Tata Safari
+6 Hyundai Creta
+7 Not Car
