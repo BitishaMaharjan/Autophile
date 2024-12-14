@@ -88,9 +88,9 @@ class _HomeScreenState extends State<HomeScreen> {
         return {
           'caption': doc['caption'] ?? '',
           'createdAt': doc['createdAt'] ?? '',
-          'dislikes': doc['dislikes'] ?? 0,
+          'downvote': doc['downvote'] ?? 0,
           'image': doc['image'] ?? '',
-          'likes': doc['likes'] ?? 0,
+          'upvote': doc['upvote'] ?? 0,
           'postId': doc.id,
           'tags': List<String>.from(doc['tags'] ?? []),
           'userId': doc['userId'] ?? 'Unknown',
