@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:autophile/core/toast.dart';
+import 'package:autophile/models/user_reaction_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:autophile/widgets/home_screen/share_option.dart';
@@ -21,18 +23,369 @@ class PostListWidget extends StatefulWidget {
 
 class _PostListWidgetState extends State<PostListWidget> {
 
+  final Map<String, Map<String, int>> localVoteCounts = {};
+  final FlutterSecureStorage storage = FlutterSecureStorage();
+
+  @override
+  void initState() {
+    super.initState();
+    for (var post in widget.posts) {
+      localVoteCounts[post['postId']] = {
+        'upvote': post['upvote'] ?? 0,
+        'downvote': post['downvote'] ?? 0,
+      };
+    }
+  }
+
+  Future<bool> checkIfFavorited(String postId) async {
+    try {
+      final userId = await storage.read(key: 'userId');
+      final favoritesRef = await FirebaseFirestore.instance
+          .collection('favourites')
+          .where('userId', isEqualTo: userId)
+          .where('postId', isEqualTo: postId)
+          .get();
+
+      return favoritesRef.docs.isNotEmpty;
+    } catch (e) {
+      print("Error checking if post is favorited: $e");
+      return false;
+    }
+  }
+
+  Future<bool> addToFavourite(String postId) async {
+    try {
+      final userId = await storage.read(key: 'userId');
+      if (userId != null) {
+        final favoritesRef = await FirebaseFirestore.instance
+            .collection('favourites')
+            .where('userId', isEqualTo: userId)
+            .where('postId', isEqualTo: postId)
+            .get();
+
+        if (favoritesRef.docs.isNotEmpty) {
+          await favoritesRef.docs.first.reference.delete();
+          ToastUtils.showSuccess('Removed from favorites');
+        } else {
+          final favouriteDocRef = await FirebaseFirestore.instance
+              .collection('favourites')
+              .add({
+            'postId': postId,
+            'userId': userId,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+
+          ToastUtils.showSuccess('Added to favorites');
+          return true;
+        }
+        return true;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please log in to add favorites')),
+        );
+        return false;
+      }
+    } catch (e) {
+      print('Error adding to favorites: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred')),
+      );
+      return false;
+    }
+  }
+  // Future<void> handleUpvote(String postId) async {
+  //   final storage = FlutterSecureStorage();
+  //   final userId = await storage.read(key: 'userId');
+  //   if (userId == null) {
+  //     throw Exception("User not logged in");
+  //   }
+  //
+  //   final userReactionsRef = FirebaseFirestore.instance.collection('userReactions');
+  //   final postsRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+  //
+  //   final querySnapshot = await userReactionsRef
+  //       .where('postId', isEqualTo: postId)
+  //       .where('userId', isEqualTo: userId)
+  //       .get();
+  //
+  //   if (querySnapshot.docs.isNotEmpty) {
+  //     final reactionDoc = querySnapshot.docs.first;
+  //     final userReaction = UserReaction.fromFirestore(reactionDoc.id, reactionDoc.data());
+  //
+  //     if (userReaction.upvote) {
+  //       await postsRef.update({'upvote': FieldValue.increment(-1)});
+  //       await reactionDoc.reference.update({'upvote': false});
+  //     } else if (userReaction.downvote) {
+  //       await postsRef.update({
+  //         'upvote': FieldValue.increment(1),
+  //         'downvote': FieldValue.increment(-1),
+  //       });
+  //       await reactionDoc.reference.update({'upvote': true, 'downvote': false});
+  //     } else {
+  //       await postsRef.update({'upvote': FieldValue.increment(1)});
+  //       await reactionDoc.reference.update({'upvote': true});
+  //     }
+  //   } else {
+  //     await postsRef.update({'upvote': FieldValue.increment(1)});
+  //     await userReactionsRef.add(UserReaction(
+  //       postId: postId,
+  //       userId: userId,
+  //       upvote: true,
+  //     ).toJson());
+  //   }
+  // }
+  //
+  // Future<void> handleDownvote(String postId) async {
+  //   final storage = FlutterSecureStorage();
+  //   final userId = await storage.read(key: 'userId');
+  //   if (userId == null) {
+  //     throw Exception("User not logged in");
+  //   }
+  //
+  //   final userReactionsRef = FirebaseFirestore.instance.collection('userReactions');
+  //   final postsRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+  //
+  //   final querySnapshot = await userReactionsRef
+  //       .where('postId', isEqualTo: postId)
+  //       .where('userId', isEqualTo: userId)
+  //       .get();
+  //
+  //   if (querySnapshot.docs.isNotEmpty) {
+  //     final reactionDoc = querySnapshot.docs.first;
+  //     final userReaction = UserReaction.fromFirestore(reactionDoc.id, reactionDoc.data());
+  //
+  //     if (userReaction.downvote) {
+  //       await postsRef.update({'downvote': FieldValue.increment(-1)});
+  //       await reactionDoc.reference.update({'downvote': false});
+  //     } else if (userReaction.upvote) {
+  //       await postsRef.update({
+  //         'downvote': FieldValue.increment(1),
+  //         'upvote': FieldValue.increment(-1),
+  //       });
+  //       await reactionDoc.reference.update({'downvote': true, 'upvote': false});
+  //     } else {
+  //       await postsRef.update({'downvote': FieldValue.increment(1)});
+  //       await reactionDoc.reference.update({'downvote': true});
+  //     }
+  //   } else {
+  //     await postsRef.update({'downvote': FieldValue.increment(1)});
+  //     await userReactionsRef.add(UserReaction(
+  //       postId: postId,
+  //       userId: userId,
+  //       downvote: true,
+  //     ).toJson());
+  //   }
+  // }
+
+  Future<void> handleUpvote(String postId) async {
+    try {
+      final storage = FlutterSecureStorage();
+      final userId = await storage.read(key: 'userId');
+      if (userId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please log in to vote')),
+        );
+        return;
+      }
+
+      final userReactionsRef = FirebaseFirestore.instance.collection('userReactions');
+      final postsRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+
+      final querySnapshot = await userReactionsRef
+          .where('postId', isEqualTo: postId)
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      // Update local state first
+      setState(() {
+        if (querySnapshot.docs.isNotEmpty) {
+          final userReaction = UserReaction.fromFirestore(
+              querySnapshot.docs.first.id, querySnapshot.docs.first.data());
+
+          if (userReaction.upvote) {
+            // Remove upvote
+            localVoteCounts[postId]!['upvote'] = (localVoteCounts[postId]!['upvote'] ?? 0) - 1;
+          } else if (userReaction.downvote) {
+            // Switch from downvote to upvote
+            localVoteCounts[postId]!['upvote'] = (localVoteCounts[postId]!['upvote'] ?? 0) + 1;
+            localVoteCounts[postId]!['downvote'] = (localVoteCounts[postId]!['downvote'] ?? 0) - 1;
+          } else {
+            // Add new upvote
+            localVoteCounts[postId]!['upvote'] = (localVoteCounts[postId]!['upvote'] ?? 0) + 1;
+          }
+        } else {
+          // Add new upvote
+          localVoteCounts[postId]!['upvote'] = (localVoteCounts[postId]!['upvote'] ?? 0) + 1;
+        }
+      });
+
+      // Then update Firebase
+      if (querySnapshot.docs.isNotEmpty) {
+        final reactionDoc = querySnapshot.docs.first;
+        final userReaction = UserReaction.fromFirestore(reactionDoc.id, reactionDoc.data());
+
+        if (userReaction.upvote) {
+          await postsRef.update({'upvote': FieldValue.increment(-1)});
+          await reactionDoc.reference.update({'upvote': false});
+        } else if (userReaction.downvote) {
+          await postsRef.update({
+            'upvote': FieldValue.increment(1),
+            'downvote': FieldValue.increment(-1),
+          });
+          await reactionDoc.reference.update({'upvote': true, 'downvote': false});
+        } else {
+          await postsRef.update({'upvote': FieldValue.increment(1)});
+          await reactionDoc.reference.update({'upvote': true});
+        }
+      } else {
+        await postsRef.update({'upvote': FieldValue.increment(1)});
+        await userReactionsRef.add(UserReaction(
+          postId: postId,
+          userId: userId,
+          upvote: true,
+        ).toJson());
+      }
+    } catch (e) {
+      print('Error handling upvote: $e');
+      // Revert local state if Firebase update fails
+      setState(() {
+        localVoteCounts[postId] = {
+          'upvote': widget.posts.firstWhere((p) => p['postId'] == postId)['upvote'] ?? 0,
+          'downvote': widget.posts.firstWhere((p) => p['postId'] == postId)['downvote'] ?? 0,
+        };
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update vote')),
+      );
+    }
+  }
+
+  Future<void> handleDownvote(String postId) async {
+    try {
+      final storage = FlutterSecureStorage();
+      final userId = await storage.read(key: 'userId');
+      if (userId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please log in to vote')),
+        );
+        return;
+      }
+
+      final userReactionsRef = FirebaseFirestore.instance.collection('userReactions');
+      final postsRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+
+      final querySnapshot = await userReactionsRef
+          .where('postId', isEqualTo: postId)
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      // Update local state first
+      setState(() {
+        if (querySnapshot.docs.isNotEmpty) {
+          final userReaction = UserReaction.fromFirestore(
+              querySnapshot.docs.first.id, querySnapshot.docs.first.data());
+
+          if (userReaction.downvote) {
+            // Remove downvote
+            localVoteCounts[postId]!['downvote'] = (localVoteCounts[postId]!['downvote'] ?? 0) - 1;
+          } else if (userReaction.upvote) {
+            // Switch from upvote to downvote
+            localVoteCounts[postId]!['downvote'] = (localVoteCounts[postId]!['downvote'] ?? 0) + 1;
+            localVoteCounts[postId]!['upvote'] = (localVoteCounts[postId]!['upvote'] ?? 0) - 1;
+          } else {
+            // Add new downvote
+            localVoteCounts[postId]!['downvote'] = (localVoteCounts[postId]!['downvote'] ?? 0) + 1;
+          }
+        } else {
+          // Add new downvote
+          localVoteCounts[postId]!['downvote'] = (localVoteCounts[postId]!['downvote'] ?? 0) + 1;
+        }
+      });
+
+      // Then update Firebase
+      if (querySnapshot.docs.isNotEmpty) {
+        final reactionDoc = querySnapshot.docs.first;
+        final userReaction = UserReaction.fromFirestore(reactionDoc.id, reactionDoc.data());
+
+        if (userReaction.downvote) {
+          await postsRef.update({'downvote': FieldValue.increment(-1)});
+          await reactionDoc.reference.update({'downvote': false});
+        } else if (userReaction.upvote) {
+          await postsRef.update({
+            'downvote': FieldValue.increment(1),
+            'upvote': FieldValue.increment(-1),
+          });
+          await reactionDoc.reference.update({'downvote': true, 'upvote': false});
+        } else {
+          await postsRef.update({'downvote': FieldValue.increment(1)});
+          await reactionDoc.reference.update({'downvote': true});
+        }
+      } else {
+        await postsRef.update({'downvote': FieldValue.increment(1)});
+        await userReactionsRef.add(UserReaction(
+          postId: postId,
+          userId: userId,
+          downvote: true,
+        ).toJson());
+      }
+    } catch (e) {
+      print('Error handling downvote: $e');
+      // Revert local state if Firebase update fails
+      setState(() {
+        localVoteCounts[postId] = {
+          'upvote': widget.posts.firstWhere((p) => p['postId'] == postId)['upvote'] ?? 0,
+          'downvote': widget.posts.firstWhere((p) => p['postId'] == postId)['downvote'] ?? 0,
+        };
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update vote')),
+      );
+    }
+  }
+
+  void _showCommentModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return FractionallySizedBox(
+          heightFactor: 0.7,
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+              left: 16,
+              right: 16,
+              top: 16,
+            ),
+            child: CommentWidget(
+              username: 'User1',
+              commentText: 'This is a comment',
+              time: '5m ago',
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
 
 
     return Column(
       children: widget.posts.map((post) {
-        int likes = (post['likes'] is int)
-            ? post['likes'] as int
-            : 0;
-        int dislikes = (post['dislikes'] is int)
-            ? post['dislikes'] as int
-            : 0;
+        // int upvote = (post['upvote'] is int)
+        //     ? post['upvote'] as int
+        //     : 0;
+        // int downvote = (post['downvote'] is int)
+        //     ? post['downvote'] as int
+        //     : 0;
+        int upvote = localVoteCounts[post['postId']]?['upvote'] ?? 0;
+        int downvote = localVoteCounts[post['postId']]?['downvote'] ?? 0;
         int comments = (post['comments'] is int)
             ? post['comments'] as int
             : 0;
@@ -94,7 +447,6 @@ class _PostListWidgetState extends State<PostListWidget> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // User Row
                 StreamBuilder<DocumentSnapshot>(
                   stream: FirebaseFirestore.instance
                       .collection('users')
@@ -189,22 +541,21 @@ class _PostListWidgetState extends State<PostListWidget> {
                     Row(
                       children: [
                         IconButton(
-                          icon: Icon(Icons.thumb_up_outlined),
-                          onPressed: () {
-                          },
+                          icon: Image.asset('assets/icons/upvote.png'),
+                          onPressed: ()=>handleUpvote(post['postId']),
                         ),
-                        Text('$likes'),
+                        Text('$upvote'),
                       ],
                     ),
 
                     Row(
                       children: [
                         IconButton(
-                          icon: Icon(Icons.thumb_down_outlined),
-                          onPressed: () {
-                          },
+
+                          icon: Image.asset('assets/icons/downvote.png'),
+                          onPressed: ()=>handleDownvote(post['postId']),
                         ),
-                        Text('$dislikes'),
+                        Text('$downvote'),
                       ],
                     ),
 

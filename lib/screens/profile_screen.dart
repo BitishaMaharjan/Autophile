@@ -92,7 +92,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             name: "Bitisha Maharjan",
                             location: "Kathmandu, Nepal",
                             bio: "Car enthusiast / heritage lover",
-
                           ),
                           const SizedBox(height: 26),
                           Row(
