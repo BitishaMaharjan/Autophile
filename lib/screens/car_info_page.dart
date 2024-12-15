@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-
+import 'package:autophile/screens/threeD_model_page.dart';
 class CarDetailsScreen extends StatefulWidget {
-  const CarDetailsScreen({super.key});
+  final Map<String, dynamic> car;
+
+  const CarDetailsScreen({Key? key, required this.car}) : super(key: key);
 
   @override
   _CarDetailsScreenState createState() => _CarDetailsScreenState();
@@ -18,7 +20,7 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
           return Row(
             children: [
               SizedBox(
-                width: constraints.maxWidth * 0.4,
+                width: constraints.maxWidth * 0.43,
                 height: double.infinity,
                 child: Stack(
                   children: [
@@ -40,32 +42,14 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
                     ),
                     Positioned(
                       top: 10,
-                      left: MediaQuery.of(context).size.width * 0.03,
+                      left: 0,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           const SizedBox(height: 60),
-                          const Text(
-                            '24',
-                            style: TextStyle(
-                              fontSize: 32,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
                           Text(
-                            'Jan\nrelease\n2024',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: colorScheme.onPrimary,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 110),
-                           const Text(
-                            '45K \$',
-                            style: TextStyle(
+                            widget.car['year'] ?? 'Unknown Date',
+                            style: const TextStyle(
                               fontSize: 28,
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -73,7 +57,26 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            'release',
+                            '📅Release',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: colorScheme.onPrimary,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 110),
+                           Text(
+                             widget.car['price'] ?? 'Unknown Date',
+
+                             style: const TextStyle(
+                              fontSize: 23,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            '💲Price ',
                             style: TextStyle(
                               fontSize: 14,
                               color: colorScheme.onPrimary,
@@ -89,8 +92,10 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
                             shape: const CircleBorder(),
                             child: ElevatedButton(
                               onPressed: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('3D Model Button Pressed')),
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>  ThreedModelPage(car: widget.car,),
+                                  ),
                                 );
                               },
                               style: ElevatedButton.styleFrom(
@@ -100,7 +105,7 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
                               child: Text(
                                 '3D\nModel',
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 30,
                                   fontWeight: FontWeight.bold,
                                   color: colorScheme.onTertiary,
                                 ),
@@ -109,25 +114,31 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
                             ),
                           ),
                           const SizedBox(height: 100),
-                          const Text(
-                            '90 mpg',
-                            style: TextStyle(
+                           Text(
+          widget.car['mileage'] ?? 'Na data',
+                            style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: 23,
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          const SizedBox(height: 5),
+                          const SizedBox(height: 2),
                           Text(
                             'mileage',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 15,
                               color: colorScheme.onPrimary,
                             ),
                             textAlign: TextAlign.center,
                           ),
                         ],
                       ),
+                    ),
+                    Positioned(
+                      bottom: 10,
+                      left: 0,
+                      right: 0,
+                      child: CarDescriptionBox(car: widget.car),
                     ),
                   ],
                 ),
@@ -144,7 +155,7 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
                           children: [
                             const SizedBox(height: 10),
                             Text(
-                              'Ferrari 290',
+                             widget.car['name'] ?? '' ,
                               style: TextStyle(
                                 fontSize: 40,
                                 fontWeight: FontWeight.bold,
@@ -156,18 +167,13 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
                       ),
                       Center(
                         child: Image.asset(
-                          'assets/images/ferrari.png',
+                       widget.car['image'] ??  'assets/images/ferrari.png',
                           fit: BoxFit.contain,
                           width: constraints.maxWidth * 0.5,
                           height: constraints.maxHeight * 0.6,
                         ),
                       ),
-                      const Positioned(
-                        bottom: 20,
-                        left: 0,
-                        right: 20,
-                        child: CarDescriptionBox(),
-                      ),
+
                     ],
                   ),
                 ),
@@ -181,16 +187,37 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
 }
 
 class CarDescriptionBox extends StatefulWidget {
-  const CarDescriptionBox({super.key});
+  final Map<String, dynamic> car;
+
+  const CarDescriptionBox({Key? key, required this.car}) : super(key: key);
 
   @override
   _CarDescriptionBoxState createState() => _CarDescriptionBoxState();
 }
 
 class _CarDescriptionBoxState extends State<CarDescriptionBox> {
+  bool _isExpanded = false;
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final String description = widget.car['description'] ?? 'No description available';
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    const double avgWordWidth = 7.5; // Approximate average word width in pixels
+    const double paddingWidth = 32; // Account for container padding (16 + 16)
+    final maxCharsPerLine = ((screenWidth - paddingWidth) / avgWordWidth).floor();
+    const int lines = 2; // Number of lines before truncation
+    final int maxWords = maxCharsPerLine * lines ~/ avgWordWidth; // Estimate max words
+
+    // Split description into words
+    final words = description.split(' ');
+    final bool needsTruncation = words.length > maxWords;
+
+    // Decide what to display
+    final displayText = needsTruncation && !_isExpanded
+        ? words.take(maxWords).join(' ') + '...'
+        : description;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
@@ -198,15 +225,36 @@ class _CarDescriptionBoxState extends State<CarDescriptionBox> {
         color: colorScheme.secondary,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Text(
-        'The Tesla Model S is a battery-electric, four-door full-size car that has been produced by the American automaker Tesla since 2012. The Tesla Model S is a battery-electric, four-door full-size car.',
-        style: TextStyle(
-        color: Colors.white,
-          fontSize: 14,
-          height: 1.5,
-        ),
-        textAlign: TextAlign.justify,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            displayText,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.justify,
+          ),
+          if (needsTruncation)
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _isExpanded = !_isExpanded;
+                });
+              },
+              child: Text(
+                _isExpanded ? 'See Less' : 'See More',
+                style: TextStyle(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
 }
+
