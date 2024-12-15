@@ -31,7 +31,7 @@ class _SplashWrapperState extends State<SplashWrapper> {
     if (userId != null) {
       Navigator.pushReplacementNamed(context, '/home');
     } else {
-      Navigator.pushReplacementNamed(context, '/auth');
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LandingPage()));
     }
   }
 
