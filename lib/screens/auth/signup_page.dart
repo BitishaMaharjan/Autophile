@@ -12,6 +12,81 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:autophile/models/user_model.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+const String userAgreementContent = '''
+Welcome to Autophile! Please read this User Agreement carefully before creating an account.
+
+1. Account Creation:
+- You must provide accurate, current, and complete information during the signup process.
+- You are responsible for maintaining the confidentiality of your account credentials.
+- You agree to notify us immediately if you suspect unauthorized access to your account.
+
+2. User Responsibilities:
+- You agree to use Autophile in compliance with all applicable laws and regulations.
+- You will not engage in any activities that disrupt the platform or harm other users.
+- You are responsible for all activities that occur under your account.
+
+3. Prohibited Activities:
+- No unauthorized access, hacking, or misuse of Autophile services.
+- No posting of illegal, harmful, or offensive content.
+- No spamming, fraud, or deceptive practices.
+
+4. Intellectual Property:
+- All content, logos, and services provided by Autophile are protected by copyright and trademark laws.
+- You may not copy, distribute, or modify Autophile’s content without permission.
+
+5. Termination:
+- Autophile reserves the right to suspend or terminate your account if you violate these terms.
+- You may terminate your account at any time by contacting support.
+
+6. Limitation of Liability:
+- Autophile is not liable for any damages resulting from the use or inability to use the platform.
+- The platform is provided "as is" without warranties of any kind.
+
+By creating an account, you agree to abide by these terms and conditions. If you do not agree, please do not use Autophile.
+''';
+
+
+const String privacyPolicyContent = '''
+Autophile Privacy Policy
+
+1. Data Collection:
+- We collect personal information such as your email address, name, and password during account creation.
+- We may collect usage data, such as app interactions, to improve our services.
+
+2. How We Use Your Data:
+- To provide, maintain, and improve our services.
+- To personalize your user experience.
+- To communicate with you regarding updates, support, and promotional offers.
+
+3. Data Sharing:
+- We do not sell or share your personal data with third parties without your consent.
+- We may share data with trusted partners who assist us in operating the app, subject to confidentiality agreements.
+
+4. Data Security:
+- We implement security measures such as encryption to protect your data.
+- While we strive to protect your information, no method of transmission is 100% secure.
+
+5. User Rights:
+- You have the right to access, modify, or delete your personal data.
+- You can request data deletion by contacting our support team.
+
+6. Cookies and Tracking:
+- We may use cookies or similar tracking technologies to analyze usage patterns and improve the app.
+
+7. Children’s Privacy:
+- Autophile is not intended for children under 13. We do not knowingly collect data from children.
+
+8. Changes to this Policy:
+- We may update this Privacy Policy periodically. You will be notified of significant changes.
+
+9. Contact Us:
+- If you have questions or concerns about this Privacy Policy, please contact us at support@autophile.com.
+
+By using Autophile, you consent to the practices outlined in this Privacy Policy.
+''';
+
+
+
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
 
@@ -47,7 +122,7 @@ class _SignupPageState extends State<SignupPage> {
 
   Future<void> signUp() async {
     if(!_isChecked){
-      ToastUtils.showError('Please agree to user agreement to continue');
+      ToastUtils.showError('Please agree to user agreement and privacy policy to continue');
       return;
     }
     if (!emailRegex.hasMatch(emailController.text)) {
@@ -195,7 +270,7 @@ class _SignupPageState extends State<SignupPage> {
                               ),
                               recognizer: TapGestureRecognizer()
                                 ..onTap=(){
-                                _showPopup(context,"User Agreement","This is user agreement");
+                                _showPopup(context,"User Agreement",userAgreementContent);
                                 }
                             ),
                             TextSpan(text:" and "),
@@ -207,7 +282,7 @@ class _SignupPageState extends State<SignupPage> {
                             ),
                             recognizer: TapGestureRecognizer()
                             ..onTap=(){
-                              _showPopup(context,"Privacy Policy","This is privacy policy");
+                              _showPopup(context,"Privacy Policy",privacyPolicyContent);
                             })
                           ]
                         )))
@@ -317,26 +392,54 @@ class _SignupPageState extends State<SignupPage> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
-          content: SingleChildScrollView(
-            child: Text(
-              content,
-              style: TextStyle(fontSize: 14),
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 400,
+              maxHeight: 600,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Text(
+                        content,
+                        style: TextStyle(fontSize: 14, height: 1.2),
+                        textAlign: TextAlign.justify,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: AppButton(
+                      text: "Close",
+                      onTap: () {
+                        Navigator.of(context).pop(); // Close the popup
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the popup
-              },
-              child: Text("Close"),
-            ),
-          ],
         );
       },
     );
   }
+
 }
 
 
