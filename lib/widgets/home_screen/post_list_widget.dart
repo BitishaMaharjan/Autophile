@@ -342,36 +342,6 @@ class _PostListWidgetState extends State<PostListWidget> {
       );
     }
   }
-
-  void _showCommentModal(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return FractionallySizedBox(
-          heightFactor: 0.7,
-          child: Padding(
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-              left: 16,
-              right: 16,
-              top: 16,
-            ),
-            child: CommentWidget(
-              username: 'User1',
-              commentText: 'This is a comment',
-              time: '5m ago',
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-
   @override
   Widget build(BuildContext context) {
 
@@ -471,7 +441,6 @@ class _PostListWidgetState extends State<PostListWidget> {
                     }
 
                     final userData = snapshot.data?.data() as Map<String, dynamic>?;
-                    final userId = userData?['userId'];
                     final username = userData?['name'] ?? 'Unknown User';
                     final photoUrl = userData?['photo'] ?? '';
 
@@ -481,7 +450,7 @@ class _PostListWidgetState extends State<PostListWidget> {
                           radius: 20,
                           backgroundImage: photoUrl == '' ?? true
                               ? NetworkImage('https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png')
-                              : NetworkImage(photoUrl),
+                              : MemoryImage(base64Decode(photoUrl)),
 
                           onBackgroundImageError: (_, __) {
                             print('Error loading image');
@@ -506,7 +475,37 @@ class _PostListWidgetState extends State<PostListWidget> {
                             ],
                           ),
                         ),
-                        Icon(Icons.more_vert, color: Colors.grey),
+                        FutureBuilder<bool>(
+                          future: checkIfFavorited(post['postId']),
+                          builder: (context, initialSnapshot) {
+                            bool isFavorited = initialSnapshot.data ?? false;
+
+                            return StatefulBuilder(
+                              builder: (context, setLocalState) {
+                                return IconButton(
+                                  icon: Icon(
+                                    isFavorited ? Icons.bookmark : Icons.bookmark_border,
+                                    color: isFavorited ? Colors.orange : Colors.grey,
+                                  ),
+                                  onPressed: () async {
+                                    setLocalState(() {
+                                      isFavorited = !isFavorited;
+                                    });
+
+                                    try {
+                                      await addToFavourite(post['postId']);
+                                    } catch (e) {
+                                      setLocalState(() {
+                                        isFavorited = !isFavorited;
+                                      });
+                                      print('Error toggling favorite: $e');
+                                    }
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        )
                       ],
                     );
                   },
@@ -747,46 +746,65 @@ class _CommentWidgetState extends State<CommentWidget> {
                             return CircleAvatar(
                               radius: 20,
                               backgroundImage: photoUrl.isNotEmpty
-                                  ? NetworkImage(photoUrl)
+                                  ? MemoryImage(base64Decode(photoUrl))
                                   : AssetImage('assets/images/profile_picture.png') as ImageProvider,
                             );
                           },
                         ),
                         const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    comment.userId, // Replace with actual username fetching logic
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
+                        StreamBuilder<DocumentSnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(comment.userId)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return CircleAvatar(
+                                radius: 20,
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+
+                            final userData = snapshot.data?.data() as Map<String, dynamic>?;
+                            final username = userData?['name'] ?? 'Unknown User';
+
+                            return
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          username,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          timeago.format(comment.createdAt),
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            color: Theme.of(context).colorScheme.onPrimary,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    timeago.format(comment.createdAt),
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                      color: Theme.of(context).colorScheme.onPrimary,
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      comment.text,
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w400,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                comment.text,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
+                              );
+                          },
                         ),
                       ],
                     ),
