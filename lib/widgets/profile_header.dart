@@ -26,7 +26,9 @@ class ProfileHeader extends StatelessWidget {
         const SizedBox(height: 30,),
         CircleAvatar(
           radius: 60,
-          backgroundImage: MemoryImage(base64Decode(profileImageUrl))
+          backgroundImage: profileImageUrl != null && profileImageUrl.isNotEmpty
+              ? MemoryImage(base64Decode(profileImageUrl))
+              : NetworkImage('https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png')
         ),
         const SizedBox(height: 7),
         Text(
