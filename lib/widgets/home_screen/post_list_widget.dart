@@ -25,6 +25,7 @@ class _PostListWidgetState extends State<PostListWidget> {
 
   final Map<String, Map<String, int>> localVoteCounts = {};
   final FlutterSecureStorage storage = FlutterSecureStorage();
+  final Map<String, Stream<int>> commentCountStreams = {};
 
   @override
   void initState() {
@@ -34,7 +35,16 @@ class _PostListWidgetState extends State<PostListWidget> {
         'upvote': post['upvote'] ?? 0,
         'downvote': post['downvote'] ?? 0,
       };
+      commentCountStreams[post['postId']] = getCommentCountStream(post['postId']);
     }
+  }
+
+  Stream<int> getCommentCountStream(String postId) {
+    return FirebaseFirestore.instance
+        .collection('comments')
+        .where('postId', isEqualTo: postId)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.length);
   }
 
   Future<bool> checkIfFavorited(String postId) async {
@@ -93,90 +103,6 @@ class _PostListWidgetState extends State<PostListWidget> {
       return false;
     }
   }
-  // Future<void> handleUpvote(String postId) async {
-  //   final storage = FlutterSecureStorage();
-  //   final userId = await storage.read(key: 'userId');
-  //   if (userId == null) {
-  //     throw Exception("User not logged in");
-  //   }
-  //
-  //   final userReactionsRef = FirebaseFirestore.instance.collection('userReactions');
-  //   final postsRef = FirebaseFirestore.instance.collection('posts').doc(postId);
-  //
-  //   final querySnapshot = await userReactionsRef
-  //       .where('postId', isEqualTo: postId)
-  //       .where('userId', isEqualTo: userId)
-  //       .get();
-  //
-  //   if (querySnapshot.docs.isNotEmpty) {
-  //     final reactionDoc = querySnapshot.docs.first;
-  //     final userReaction = UserReaction.fromFirestore(reactionDoc.id, reactionDoc.data());
-  //
-  //     if (userReaction.upvote) {
-  //       await postsRef.update({'upvote': FieldValue.increment(-1)});
-  //       await reactionDoc.reference.update({'upvote': false});
-  //     } else if (userReaction.downvote) {
-  //       await postsRef.update({
-  //         'upvote': FieldValue.increment(1),
-  //         'downvote': FieldValue.increment(-1),
-  //       });
-  //       await reactionDoc.reference.update({'upvote': true, 'downvote': false});
-  //     } else {
-  //       await postsRef.update({'upvote': FieldValue.increment(1)});
-  //       await reactionDoc.reference.update({'upvote': true});
-  //     }
-  //   } else {
-  //     await postsRef.update({'upvote': FieldValue.increment(1)});
-  //     await userReactionsRef.add(UserReaction(
-  //       postId: postId,
-  //       userId: userId,
-  //       upvote: true,
-  //     ).toJson());
-  //   }
-  // }
-  //
-  // Future<void> handleDownvote(String postId) async {
-  //   final storage = FlutterSecureStorage();
-  //   final userId = await storage.read(key: 'userId');
-  //   if (userId == null) {
-  //     throw Exception("User not logged in");
-  //   }
-  //
-  //   final userReactionsRef = FirebaseFirestore.instance.collection('userReactions');
-  //   final postsRef = FirebaseFirestore.instance.collection('posts').doc(postId);
-  //
-  //   final querySnapshot = await userReactionsRef
-  //       .where('postId', isEqualTo: postId)
-  //       .where('userId', isEqualTo: userId)
-  //       .get();
-  //
-  //   if (querySnapshot.docs.isNotEmpty) {
-  //     final reactionDoc = querySnapshot.docs.first;
-  //     final userReaction = UserReaction.fromFirestore(reactionDoc.id, reactionDoc.data());
-  //
-  //     if (userReaction.downvote) {
-  //       await postsRef.update({'downvote': FieldValue.increment(-1)});
-  //       await reactionDoc.reference.update({'downvote': false});
-  //     } else if (userReaction.upvote) {
-  //       await postsRef.update({
-  //         'downvote': FieldValue.increment(1),
-  //         'upvote': FieldValue.increment(-1),
-  //       });
-  //       await reactionDoc.reference.update({'downvote': true, 'upvote': false});
-  //     } else {
-  //       await postsRef.update({'downvote': FieldValue.increment(1)});
-  //       await reactionDoc.reference.update({'downvote': true});
-  //     }
-  //   } else {
-  //     await postsRef.update({'downvote': FieldValue.increment(1)});
-  //     await userReactionsRef.add(UserReaction(
-  //       postId: postId,
-  //       userId: userId,
-  //       downvote: true,
-  //     ).toJson());
-  //   }
-  // }
-
   Future<void> handleUpvote(String postId) async {
     try {
       final storage = FlutterSecureStorage();
@@ -196,30 +122,24 @@ class _PostListWidgetState extends State<PostListWidget> {
           .where('userId', isEqualTo: userId)
           .get();
 
-      // Update local state first
       setState(() {
         if (querySnapshot.docs.isNotEmpty) {
           final userReaction = UserReaction.fromFirestore(
               querySnapshot.docs.first.id, querySnapshot.docs.first.data());
 
           if (userReaction.upvote) {
-            // Remove upvote
             localVoteCounts[postId]!['upvote'] = (localVoteCounts[postId]!['upvote'] ?? 0) - 1;
           } else if (userReaction.downvote) {
-            // Switch from downvote to upvote
             localVoteCounts[postId]!['upvote'] = (localVoteCounts[postId]!['upvote'] ?? 0) + 1;
             localVoteCounts[postId]!['downvote'] = (localVoteCounts[postId]!['downvote'] ?? 0) - 1;
           } else {
-            // Add new upvote
             localVoteCounts[postId]!['upvote'] = (localVoteCounts[postId]!['upvote'] ?? 0) + 1;
           }
         } else {
-          // Add new upvote
           localVoteCounts[postId]!['upvote'] = (localVoteCounts[postId]!['upvote'] ?? 0) + 1;
         }
       });
 
-      // Then update Firebase
       if (querySnapshot.docs.isNotEmpty) {
         final reactionDoc = querySnapshot.docs.first;
         final userReaction = UserReaction.fromFirestore(reactionDoc.id, reactionDoc.data());
@@ -247,7 +167,6 @@ class _PostListWidgetState extends State<PostListWidget> {
       }
     } catch (e) {
       print('Error handling upvote: $e');
-      // Revert local state if Firebase update fails
       setState(() {
         localVoteCounts[postId] = {
           'upvote': widget.posts.firstWhere((p) => p['postId'] == postId)['upvote'] ?? 0,
@@ -279,30 +198,24 @@ class _PostListWidgetState extends State<PostListWidget> {
           .where('userId', isEqualTo: userId)
           .get();
 
-      // Update local state first
       setState(() {
         if (querySnapshot.docs.isNotEmpty) {
           final userReaction = UserReaction.fromFirestore(
               querySnapshot.docs.first.id, querySnapshot.docs.first.data());
 
           if (userReaction.downvote) {
-            // Remove downvote
             localVoteCounts[postId]!['downvote'] = (localVoteCounts[postId]!['downvote'] ?? 0) - 1;
           } else if (userReaction.upvote) {
-            // Switch from upvote to downvote
             localVoteCounts[postId]!['downvote'] = (localVoteCounts[postId]!['downvote'] ?? 0) + 1;
             localVoteCounts[postId]!['upvote'] = (localVoteCounts[postId]!['upvote'] ?? 0) - 1;
           } else {
-            // Add new downvote
             localVoteCounts[postId]!['downvote'] = (localVoteCounts[postId]!['downvote'] ?? 0) + 1;
           }
         } else {
-          // Add new downvote
           localVoteCounts[postId]!['downvote'] = (localVoteCounts[postId]!['downvote'] ?? 0) + 1;
         }
       });
 
-      // Then update Firebase
       if (querySnapshot.docs.isNotEmpty) {
         final reactionDoc = querySnapshot.docs.first;
         final userReaction = UserReaction.fromFirestore(reactionDoc.id, reactionDoc.data());
@@ -330,7 +243,6 @@ class _PostListWidgetState extends State<PostListWidget> {
       }
     } catch (e) {
       print('Error handling downvote: $e');
-      // Revert local state if Firebase update fails
       setState(() {
         localVoteCounts[postId] = {
           'upvote': widget.posts.firstWhere((p) => p['postId'] == postId)['upvote'] ?? 0,
@@ -342,23 +254,16 @@ class _PostListWidgetState extends State<PostListWidget> {
       );
     }
   }
+
+
   @override
   Widget build(BuildContext context) {
 
 
     return Column(
       children: widget.posts.map((post) {
-        // int upvote = (post['upvote'] is int)
-        //     ? post['upvote'] as int
-        //     : 0;
-        // int downvote = (post['downvote'] is int)
-        //     ? post['downvote'] as int
-        //     : 0;
         int upvote = localVoteCounts[post['postId']]?['upvote'] ?? 0;
         int downvote = localVoteCounts[post['postId']]?['downvote'] ?? 0;
-        int comments = (post['comments'] is int)
-            ? post['comments'] as int
-            : 0;
         String caption = post['caption'] ?? '';
         List<String> tags = [];
         if (post['tags'] is List) {
@@ -561,28 +466,43 @@ class _PostListWidgetState extends State<PostListWidget> {
                     Row(
                       children: [
                         IconButton(
-                            icon: Icon(Icons.chat_bubble_outline),
-                            onPressed: (){
-                              showModalBottomSheet(
-                                context: context,
-                                isScrollControlled: true,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                                ),
-                                builder: (context) {
-                                  return FractionallySizedBox(
-                                    heightFactor: 0.7, // Adjust the height as needed
-                                    child: CommentWidget(postId: post['postId']),
-                                  );
-                                },
-                              );
-                            }
+                        icon: Icon(Icons.chat_bubble_outline),
+                        onPressed: () {
+                        showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                         ),
-                        Text('$comments'),
+                        builder: (context) {
+                        return FractionallySizedBox(
+                        heightFactor: 0.7,
+                        child: CommentWidget(postId: post['postId']),
+                        );
+                        },
+                        );
+                        }
+                        ),
+                        StreamBuilder<int>(
+                        stream: commentCountStreams[post['postId']],
+                        builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                        return Text('0');
+                        }
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        return SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        ),
+                        );
+                        }
+                        return Text('${snapshot.data ?? 0}');
+                        },
+                        ),
                       ],
                     ),
-
-
                     // Share Button and Count
                     Row(
                       children: [
@@ -740,7 +660,6 @@ class _CommentWidgetState extends State<CommentWidget> {
                             }
 
                             final userData = snapshot.data?.data() as Map<String, dynamic>?;
-                            final username = userData?['name'] ?? 'Unknown User';
                             final photoUrl = userData?['photo'] ?? '';
 
                             return CircleAvatar(
