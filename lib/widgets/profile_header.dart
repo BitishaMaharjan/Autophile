@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:autophile/screens/edit_profile.dart';
 import 'package:flutter/material.dart';
 
 class ProfileHeader extends StatelessWidget {
@@ -5,7 +8,6 @@ class ProfileHeader extends StatelessWidget {
   final String name;
   final String location;
   final String bio;
-  final VoidCallback onEditProfile;
 
   const ProfileHeader({
     Key? key,
@@ -13,7 +15,6 @@ class ProfileHeader extends StatelessWidget {
     required this.name,
     required this.location,
     required this.bio,
-    required this.onEditProfile,
   }) : super(key: key);
 
   @override
@@ -25,7 +26,9 @@ class ProfileHeader extends StatelessWidget {
         const SizedBox(height: 30,),
         CircleAvatar(
           radius: 60,
-          backgroundImage: NetworkImage(profileImageUrl),
+          backgroundImage: profileImageUrl != null && profileImageUrl.isNotEmpty
+              ? MemoryImage(base64Decode(profileImageUrl))
+              : NetworkImage('https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png')
         ),
         const SizedBox(height: 7),
         Text(
@@ -66,7 +69,10 @@ class ProfileHeader extends StatelessWidget {
         ),
         const SizedBox(height: 5),
         ElevatedButton(
-          onPressed: onEditProfile,
+          onPressed:(){
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => EditProfileScreen()));
+          },
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.secondary,
             shape: RoundedRectangleBorder(

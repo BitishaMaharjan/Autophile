@@ -56,6 +56,13 @@ dependencies:
   camera: ^0.10.0
   carousel_slider: ^5.0.0
   remove_bg: ^0.0.3
+  flutter_dotenv: ^5.2.1
+  share_plus: ^10.1.2
+  url_launcher: ^6.3.1
+  timeago: ^3.7.0
+  shimmer: ^3.0.0
+  speech_to_text: ^7.0.0
+
 
 
 dev_dependencies:
@@ -86,10 +93,16 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/models/
+    - assets/.env
     - assets/images/social_icons/
     - assets/images/autophile_logo/
     - assets/best.tflite
     - assets/labels.txt
+    - assets/images/ferrari.png
+    - assets/images/main_side_black_shape.png
+    - assets/images/profile _picture.png
+
+
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

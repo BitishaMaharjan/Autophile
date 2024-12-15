@@ -1,3 +1,4 @@
+import 'package:autophile/screens/dashboard/favourite_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,8 +11,11 @@ import 'package:autophile/screens/onboarding/SplashWrapper.dart';
 import 'package:autophile/themes/theme_provider.dart';
 import 'firebase_options.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 void main() async {
+  await dotenv.load(fileName: "assets/.env");
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Firebase
@@ -58,6 +62,7 @@ class MyApp extends StatelessWidget {
             '/home': (context) => BaseScreen(),
             '/landing': (context) => LandingPage(),
             '/camera': (context) => CameraScreen(cameras: cameras),
+            '/favourite': (context) => FavouritePage(),
           },
         );
       },

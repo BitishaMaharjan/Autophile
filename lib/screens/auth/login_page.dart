@@ -1,3 +1,4 @@
+import 'package:autophile/core/toast.dart';
 import 'package:autophile/models/user_model.dart';
 import 'package:autophile/screens/auth/forgot_password.dart';
 import 'package:autophile/screens/auth/signup_page.dart';
@@ -24,30 +25,6 @@ class _Login_PageState extends State<Login_Page> {
   TextEditingController passwordController = TextEditingController();
   final storage = FlutterSecureStorage();
 
-  void showErrorToast(String message) {
-    Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.TOP,
-      timeInSecForIosWeb: 2,
-      backgroundColor: Colors.red,
-      textColor: Colors.white,
-      fontSize: 16.0,
-    );
-  }
-  void showSuccessToast(String message) {
-    Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.TOP,
-      timeInSecForIosWeb: 2,
-      backgroundColor: Colors.lightGreenAccent,
-      textColor: Colors.black,
-      fontSize: 16.0,
-    );
-  }
-
-
   Future<void> loginWithGoogle() async {
     try {
       GoogleSignIn googleSignIn = GoogleSignIn();
@@ -69,7 +46,7 @@ class _Login_PageState extends State<Login_Page> {
       User? user = userCredential.user;
 
       if (user == null) {
-        showErrorToast("Failed to sign in with Google");
+        ToastUtils.showError("Failed to sign in with Google");
         return null;
       }
 
@@ -83,7 +60,6 @@ class _Login_PageState extends State<Login_Page> {
           id: user.uid,
           name: user.displayName ?? null,
           email: user.email!,
-          photo: user.photoURL,
           isVerified: true,
         );
 
@@ -95,14 +71,14 @@ class _Login_PageState extends State<Login_Page> {
 
       await storage.write(key: 'userId', value: user.uid);
 
-      showSuccessToast('Welcome');
+      ToastUtils.showSuccess('Welcome');
 
       Future.delayed(Duration(seconds: 1), () {
         Navigator.pushReplacementNamed(context, '/home');
       });
 
     } catch (e) {
-      showErrorToast("Error: ${e.toString()}");
+      ToastUtils.showError("Error: ${e.toString()}");
       return null;
     }
   }
@@ -111,7 +87,7 @@ class _Login_PageState extends State<Login_Page> {
     try{
       var queryResult = await FirebaseFirestore.instance.collection('users').where('email',isEqualTo: emailController.text).get();
       if(queryResult.docs.isEmpty){
-        showErrorToast('User not found!!!');
+        ToastUtils.showError('User not found!!!');
         return;
       }
       var result = queryResult.docs.first;
@@ -120,14 +96,14 @@ class _Login_PageState extends State<Login_Page> {
       if(BCrypt.checkpw(passwordController.text, storedPassword)){
         String userId = result['userId'];
         await storage.write(key: 'userId', value: userId);
-        showSuccessToast('Welcome');
+        ToastUtils.showSuccess('Welcome');
         Future.delayed(Duration(seconds: 1),(){
           Navigator.pushReplacementNamed(context, '/home');});
       }else{
-        showErrorToast('Password is incorrect');
+        ToastUtils.showError('Password is incorrect');
       }
     }catch(e){
-      showErrorToast(e.toString());
+      ToastUtils.showError(e.toString());
     }
   }
 

@@ -12,8 +12,7 @@ class SplashScreen extends StatelessWidget {
         child: Lottie.asset(
             'assets/animation/autophile_animation.json',
             width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            fit: BoxFit.fill,
+            fit: BoxFit.fitWidth,
             repeat: false
         ),
       ),
