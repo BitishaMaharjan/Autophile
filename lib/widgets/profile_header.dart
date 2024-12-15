@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:autophile/screens/edit_profile.dart';
 import 'package:flutter/material.dart';
 
@@ -24,7 +26,7 @@ class ProfileHeader extends StatelessWidget {
         const SizedBox(height: 30,),
         CircleAvatar(
           radius: 60,
-          backgroundImage: NetworkImage(profileImageUrl),
+          backgroundImage: MemoryImage(base64Decode(profileImageUrl))
         ),
         const SizedBox(height: 7),
         Text(
