@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:o3d/o3d.dart';
 
+import 'package:flutter/material.dart';
+
+
 class ThreedModelPage extends StatefulWidget {
-  const ThreedModelPage({super.key});
+  final Map<String, dynamic> car;
+
+  const ThreedModelPage({Key? key, required this.car}) : super(key: key);
 
   @override
-  State<ThreedModelPage> createState() => _ThreedModelPageState();
+  _ThreedModelPageState createState() => _ThreedModelPageState();
 }
 
 class _ThreedModelPageState extends State<ThreedModelPage> {
   O3DController o3dController = O3DController();
+
   @override
   Widget build(BuildContext context) {
+    print(widget.car['assets']);
     final List<Map<String, String>> details = [
-      {'icon': '⛽', 'title': 'Range', 'value': '12.5km'},
-      {'icon': '🚀', 'title': 'Speed', 'value': '350/kph'},
-      {'icon': '🪑', 'title': 'Capacity', 'value': '2 seat'},
-      {'icon': '⚙️', 'title': 'Gear', 'value': 'Manual'},
-      {'icon': '🔋', 'title': 'Engine', 'value': '2300Hp'},
-      {'icon': '🛞', 'title': 'Drive', 'value': 'FWD (R4)'},
+      {'icon': '⛽', 'title': 'Range', 'value': widget.car['fuelTankCapacity'] ?? 'Unknown'},
+      {'icon': '🚀', 'title': 'Power', 'value': widget.car['horsepower'] ?? 'Unknown'},
+      {'icon': '💸', 'title': 'Price', 'value': widget.car['baseMsrp'] ?? 'Unknown'},
+      {'icon': '⚙️', 'title': 'Year', 'value': widget.car['year'] ?? 'Unknown'},
+      {'icon': '🔋', 'title': 'Engine', 'value': widget.car['engineSize'] ?? 'Unknown'},
+      {'icon': '🛞', 'title': 'Pistons', 'value': widget.car['cylinders'] ?? 'Unknown'},
     ];
     return Scaffold(
       appBar: AppBar(title: const Text('3D Model'),centerTitle: true,),
@@ -28,7 +35,7 @@ class _ThreedModelPageState extends State<ThreedModelPage> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                'Tesla Model 3',
+                widget.car['name'],
                 style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -52,7 +59,7 @@ class _ThreedModelPageState extends State<ThreedModelPage> {
                   Transform.translate(
                     offset: const Offset(0, -50),
                     child: O3D(
-                      src: 'assets/models/tesla_2018_model_3.glb',
+                      src: widget.car['assets'],
                       controller: o3dController,
                       ar: false,
                       autoPlay: true,
@@ -66,7 +73,7 @@ class _ThreedModelPageState extends State<ThreedModelPage> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Text(
-                'The Tesla Model S is a battery-electric, four-door full-size car that has been produced by the American automaker Tesla since 2012. .',
+                widget.car['description'] ?? 'Unknown',
                 style: TextStyle(
                   fontSize: 18,
                   color: Colors.grey[700],

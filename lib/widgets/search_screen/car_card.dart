@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:autophile/screens/car_info_page.dart';
 
 class CarCardWidget extends StatelessWidget {
   final Map<String, dynamic> car;
@@ -8,7 +8,17 @@ class CarCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return GestureDetector(
+        onTap: () {
+          print(car);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CarDetailsScreen(car: car),
+            ),
+          );
+        },
+    child:  Card(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       elevation: 4.0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.0)),
@@ -21,7 +31,7 @@ class CarCardWidget extends StatelessWidget {
               child: Image.network(
                 car['image']!,
                 height: 120,
-                width: 120,
+                width: 170,
                 fit: BoxFit.cover,
               ),
             ),
@@ -39,12 +49,13 @@ class CarCardWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Price: ${car['price']}',
+                    'Price: ${car['price']} ',
+
                     style: const TextStyle(fontSize: 16),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Seats: ${car['seats']}',
+                    'HorsePower: ${car['horsepower']}',
                     style: const TextStyle(fontSize: 14),
                   ),
                   Text(
@@ -57,6 +68,7 @@ class CarCardWidget extends StatelessWidget {
           ],
         ),
       ),
+    )
     );
   }
 }
