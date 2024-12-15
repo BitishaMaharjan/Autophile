@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:autophile/core/toast.dart';
+import 'package:autophile/models/notification_model.dart';
 import 'package:autophile/models/user_reaction_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -65,6 +66,7 @@ class _PostListWidgetState extends State<PostListWidget> {
 
   Future<bool> addToFavourite(String postId) async {
     try {
+      final storage = FlutterSecureStorage();
       final userId = await storage.read(key: 'userId');
       if (userId != null) {
         final favoritesRef = await FirebaseFirestore.instance
@@ -86,6 +88,33 @@ class _PostListWidgetState extends State<PostListWidget> {
           });
 
           ToastUtils.showSuccess('Added to favorites');
+
+          final notificationRef = FirebaseFirestore.instance.collection('notifications');
+          final existingNotification = await notificationRef
+              .where('userId', isEqualTo: userId)
+              .where('postId', isEqualTo: postId)
+              .where('type', isEqualTo: 'fav')
+              .limit(1)
+              .get();
+
+          if (existingNotification.docs.isEmpty) {
+            final postRef = FirebaseFirestore.instance.collection('posts').doc(postId);
+            final postSnapshot = await postRef.get();
+            final postOwnerId = postSnapshot.data()?['userId'];
+
+            if (postOwnerId != userId) {
+              final notification = NotificationModel(
+                userId: userId,
+                postOwnerId: postOwnerId!,
+                postId: postId,
+                type: 'fav',
+                createdAt: Timestamp.now(),
+                isRead: false,
+              );
+
+              await notificationRef.add(notification.toJson());
+            }
+          }
           return true;
         }
         return true;
@@ -103,7 +132,9 @@ class _PostListWidgetState extends State<PostListWidget> {
       return false;
     }
   }
-  Future<void> handleUpvote(String postId) async {
+
+
+  Future handleUpvote(String postId) async {
     try {
       final storage = FlutterSecureStorage();
       final userId = await storage.read(key: 'userId');
@@ -165,6 +196,33 @@ class _PostListWidgetState extends State<PostListWidget> {
           upvote: true,
         ).toJson());
       }
+
+      final notificationRef = FirebaseFirestore.instance.collection('notifications');
+      final existingNotification = await notificationRef
+          .where('userId', isEqualTo: userId)
+          .where('postId', isEqualTo: postId)
+          .where('type', isEqualTo: 'upvote')
+          .limit(1)
+          .get();
+
+      if (existingNotification.docs.isEmpty) {
+        final postSnapshot = await postsRef.get();
+        final postOwnerId = postSnapshot.data()?['userId'];
+
+        if (postOwnerId != userId) {
+          final notification = NotificationModel(
+            userId: userId,
+            postOwnerId: postOwnerId!,
+            postId: postId,
+            type: 'upvote',
+            createdAt: Timestamp.now(),
+            isRead: false,
+          );
+
+          await notificationRef.add(notification.toJson());
+        }
+      }
+
     } catch (e) {
       print('Error handling upvote: $e');
       setState(() {
@@ -178,6 +236,7 @@ class _PostListWidgetState extends State<PostListWidget> {
       );
     }
   }
+
 
   Future<void> handleDownvote(String postId) async {
     try {
@@ -241,6 +300,32 @@ class _PostListWidgetState extends State<PostListWidget> {
           downvote: true,
         ).toJson());
       }
+
+      final notificationRef = FirebaseFirestore.instance.collection('notifications');
+      final existingNotification = await notificationRef
+          .where('userId', isEqualTo: userId)
+          .where('postId', isEqualTo: postId)
+          .where('type', isEqualTo: 'downvote')
+          .limit(1)
+          .get();
+
+      if (existingNotification.docs.isEmpty) {
+        final postSnapshot = await postsRef.get();
+        final postOwnerId = postSnapshot.data()?['userId'];
+
+        if (postOwnerId != userId) {
+          final notification = NotificationModel(
+            userId: userId,
+            postOwnerId: postOwnerId!,
+            postId: postId,
+            type: 'downvote',
+            createdAt: Timestamp.now(),
+            isRead: false,
+          );
+
+          await notificationRef.add(notification.toJson());
+        }
+      }
     } catch (e) {
       print('Error handling downvote: $e');
       setState(() {
@@ -254,6 +339,7 @@ class _PostListWidgetState extends State<PostListWidget> {
       );
     }
   }
+
 
 
   @override
@@ -652,10 +738,29 @@ class _CommentWidgetState extends State<CommentWidget> {
         createdAt: DateTime.now(),
       );
 
+      // Add the comment to the comments collection
       await FirebaseFirestore.instance
           .collection('comments')
           .doc(commentId)
           .set(comment.toJson());
+
+      // Create a notification for the comment
+      final postRef = FirebaseFirestore.instance.collection('posts').doc(widget.postId);
+      final postSnapshot = await postRef.get();
+      final postOwnerId = postSnapshot.data()?['userId']; // Post owner ID from post document
+
+      if (postOwnerId != userId) {
+        final notification = NotificationModel(
+          userId: userId,
+          postOwnerId: postOwnerId!,
+          postId: widget.postId,
+          type: 'comment', // Notification type for 'comment'
+          createdAt: Timestamp.now(),
+          isRead: false,
+        );
+
+        await FirebaseFirestore.instance.collection('notifications').add(notification.toJson());
+      }
 
       _commentController.clear();
     } catch (e) {
@@ -666,6 +771,7 @@ class _CommentWidgetState extends State<CommentWidget> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

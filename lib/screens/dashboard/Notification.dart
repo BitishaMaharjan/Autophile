@@ -1,60 +1,98 @@
 import 'package:flutter/material.dart';
-import 'package:autophile/widgets/loading_skeleton.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class NotificationPage extends StatefulWidget {
   @override
   _NotificationPageState createState() => _NotificationPageState();
 }
 
-class _NotificationPageState extends State<NotificationPage> {
-  final List<Map<String, dynamic>> notifications = [
-    {
-      "title": "New Message",
-      "description": "You have a new message from John",
-      "time": "9:08 a.m.",
-      "isRead": false,
-      "type": "message",
-    },
-    {
-      "title": "Upvote on Your Post",
-      "description": "Your post received an upvote from Alice",
-      "time": "10:15 a.m.",
-      "isRead": true,
-      "type": "upvote",
-    },
-    {
-      "title": "Downvote on Your Comment",
-      "description": "Your comment received a downvote",
-      "time": "11:00 a.m.",
-      "isRead": false,
-      "type": "downvote",
-    },
-    {
-      "title": "New Commit",
-      "description":
-      "Commit 12345 added new features to the repository. Check out the details!",
-      "time": "10:30 a.m.",
-      "isRead": false,
-      "type": "commit",
-    },
-  ];
-  bool isLoading = true;
+class _NotificationPageState extends State<NotificationPage>{
+  final FlutterSecureStorage _storage = FlutterSecureStorage();
+  List<Map<String, dynamic>> notifications = [];
+
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNotifications();
+  }
+
+  String _getTitle(String type) {
+    switch (type) {
+      case 'upvote':
+        return 'Upvote on Your Post';
+      case 'fav':
+        return 'Added to Your Favorites';
+      case 'comment':
+        return 'New Comment on Your Post';
+      case 'downvote':
+        return 'Downvote on Your Post';
+      default:
+        return 'New Notification';
+    }
+  }
+
+  String _getDescription(String type, String userName, String postId) {
+    switch (type) {
+      case 'upvote':
+        return '$userName upvoted your post';
+      case 'downvote':
+        return '$userName downvoted your post';
+      case 'fav':
+        return '$userName added your post to favorites';
+      case 'comment':
+        return '$userName commented on your post';
+      default:
+        return 'You have a new notification';
+    }
+  }
+
+  String _formatTime(Timestamp timestamp) {
+    final DateTime dateTime = timestamp.toDate();
+    return '${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')} ${dateTime.hour >= 12 ? 'PM' : 'AM'}';
+  }
 
   void _toggleReadStatus(int index) {
     setState(() {
       notifications[index]["isRead"] = !notifications[index]["isRead"];
-      isLoading = false;
     });
   }
-  @override
-  void initState() {
-    super.initState();
-    // Simulating a delay for loading notifications (e.g., from an API)
-    Future.delayed(Duration(seconds: 2), () {
-      setState(() {
-        isLoading = false; // Set to false after data is loaded
-      });
-    });
+
+  Future<void> _fetchNotifications() async {
+    try {
+      final userId = await _storage.read(key: 'userId');
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('notifications')
+          .where('postOwnerId', isEqualTo: userId)
+          .orderBy('createdAt', descending: true)
+          .limit(10)
+          .get();
+
+      for (var doc in snapshot.docs) {
+        final notification = doc.data();
+
+        final userId = notification['userId'] as String?;
+        final type = notification['type'] as String?;
+        final createdAt = notification['createdAt'] as Timestamp?;
+        final postId = notification['postId'] as String?;
+        final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+        final userSnapshot = await userRef.get();
+        final userName = userSnapshot.data()?['name'] ?? 'Unknown User';
+
+        notifications.add({
+          'id': doc.id,
+          'title': _getTitle(type!),
+          'description': _getDescription(type, userName, postId ?? ''),
+          'time': _formatTime(createdAt!),
+          'isRead': notification['isRead'] ?? false,
+          'type': type,
+        });
+      }
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   @override
@@ -62,6 +100,7 @@ class _NotificationPageState extends State<NotificationPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Notifications"),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: Icon(Icons.mark_email_read),
@@ -75,9 +114,9 @@ class _NotificationPageState extends State<NotificationPage> {
           ),
         ],
       ),
-      body: isLoading
-          ? LoadingSkeleton(isPost: false, isCarSearch: false, isNotification: true) // Show skeleton while loading
-          :  ListView.builder(
+      body: notifications.isEmpty
+          ? Center(child: Text('No notifications'))
+          : ListView.builder(
         itemCount: notifications.length,
         itemBuilder: (context, index) {
           final notification = notifications[index];
@@ -94,8 +133,8 @@ class _NotificationPageState extends State<NotificationPage> {
             case "downvote":
               notificationIcon = Icon(Icons.thumb_down, color: Colors.red);
               break;
-            case "commit":
-              notificationIcon = Icon(Icons.code, color: Colors.green);
+            case "fav":
+              notificationIcon = Icon(Icons.favorite, color: Colors.red);
               break;
             default:
               notificationIcon = Icon(Icons.notifications, color: Colors.grey);
@@ -104,37 +143,29 @@ class _NotificationPageState extends State<NotificationPage> {
           return Dismissible(
             key: Key(notification["title"] ?? ""),
             onDismissed: (direction) {
-              // Save the notification that is being removed
-              final removedNotification = notifications[index];
-
-              // Remove the notification from the list
               setState(() {
                 notifications.removeAt(index);
               });
 
-              // Show the SnackBar with an undo action
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(" ${removedNotification['title']} is removed!"),
-                  behavior: SnackBarBehavior.floating, // Make the snack bar float
-                  margin: EdgeInsets.fromLTRB(20, 50, 20, 20), // Ensure the snack bar doesn't go out of bounds
+                  content: Text("${notification['title']} is removed!"),
+                  behavior: SnackBarBehavior.floating,
+                  margin: EdgeInsets.fromLTRB(20, 50, 20, 20),
                   action: SnackBarAction(
                     label: 'UNDO',
                     onPressed: () {
-                      // Restore the notification back to the list
                       setState(() {
-                        notifications.insert(index, removedNotification);
+                        notifications.insert(index, notification);
                       });
                     },
-                    textColor: Colors.white, // Set the undo button text color to white
+                    textColor: Colors.white,
                   ),
                   backgroundColor: Colors.black,
                   duration: Duration(seconds: 3),
                 ),
               );
             },
-
-
             background: Container(
               color: Colors.red,
               child: Align(
