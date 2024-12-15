@@ -5,6 +5,7 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path_provider/path_provider.dart';
+import 'package:autophile/services/image_modal_helper.dart';
 
 class Classifier {
   late Interpreter interpreter;
@@ -67,6 +68,7 @@ class Classifier {
 }
 
 class CameraScreen extends StatefulWidget {
+
   final List<CameraDescription> cameras;
   CameraScreen({required this.cameras});
 
@@ -75,6 +77,8 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
+  final ImageModalService _imageModalService = ImageModalService();
+  late File _capturedImage;
   late CameraController _controller;
   late Classifier classifier;
   String detectedLabel = 'Detecting...';
@@ -139,6 +143,7 @@ class _CameraScreenState extends State<CameraScreen> {
       setState(() {
         detectedLabel = result[0];
         confidence = result[1];
+        _capturedImage = imageFile;
       });
     } catch (e) {
       print('Error during classification: $e');
@@ -263,7 +268,7 @@ class _CameraScreenState extends State<CameraScreen> {
           // Camera switch button
           Positioned(
             bottom: 20,
-            right: 50,
+            left: 50,
             child: IconButton(
               icon: Icon(
                 Icons.switch_camera,
@@ -302,6 +307,19 @@ class _CameraScreenState extends State<CameraScreen> {
               child: Icon(Icons.camera, size: 60 ,color: Colors.white70),
             ),
           ),
+          if (!isProcessing && detectedLabel != 'Detecting...')
+            Positioned(
+              bottom: 20,
+              right:50,
+              // left: MediaQuery.of(context).size.width / 2 - 20, // Center the button
+              child: FloatingActionButton(
+                backgroundColor: Colors.green,
+                onPressed: () {
+                  _imageModalService.showSaveModal(context, detectedLabel, confidence, _capturedImage);
+                },
+                child: Icon(Icons.save, color: Colors.white),
+              ),
+            ),
         ],
       ),
     );
