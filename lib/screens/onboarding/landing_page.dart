@@ -135,7 +135,7 @@ class _LandingPageState extends State<LandingPage> {
                   AppButton(text: 'Sign in', onTap: (){Navigator.pushNamed(context, '/auth');}),
                   SizedBox(height: 20),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: loginWithGoogle,
                     child: Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
