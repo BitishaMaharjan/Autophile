@@ -151,11 +151,11 @@ class _SearchPageState extends State<SearchPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "Featured Cars",
+                    "Featured Posts",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
-                  FeaturedCarsList(featuredCars: featuredCars),
+                  FeaturedPostsList(),
                   const SizedBox(height: 20),
                   const Text(
                     "Trending News",

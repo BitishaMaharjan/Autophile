@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:autophile/core/toast.dart';
 import 'package:autophile/models/post_model.dart';
 import 'package:autophile/models/user_model.dart';
 import 'package:autophile/widgets/home_screen/home_floating_button.dart';
@@ -139,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
 
       if (docRef.id.isNotEmpty) {
-        showSuccessToast('Post created successfully');
+        ToastUtils.showSuccess('Post created successfully');
         Navigator.pop(context);
       } else {
         showErrorToast("Post creation failed. Document ID is empty.");
@@ -306,7 +307,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     ...tags.map(
                           (tag) => Chip(
-                        label: Text(tag, style: TextStyle(color: Theme.of(context).colorScheme.onSecondaryContainer)),
+                        label: Text(tag, style: TextStyle(color: Theme.of(context).colorScheme.primary)),
                         backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
                         deleteIcon: Icon(Icons.close, size: 18, color: Theme.of(context).colorScheme.error),
                         onDeleted: () {
