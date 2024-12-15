@@ -60,7 +60,6 @@ class _Login_PageState extends State<Login_Page> {
           id: user.uid,
           name: user.displayName ?? null,
           email: user.email!,
-          photo: user.photoURL,
           isVerified: true,
         );
 

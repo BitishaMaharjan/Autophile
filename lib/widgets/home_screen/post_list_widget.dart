@@ -410,7 +410,90 @@ class _PostListWidgetState extends State<PostListWidget> {
                               },
                             );
                           },
+                        ),
+                        FutureBuilder<String?>(
+                          future: storage.read(key: 'userId'),
+                          builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return SizedBox.shrink();
+                            }
+
+                            if (snapshot.hasError || !snapshot.hasData) {
+                              return SizedBox.shrink();
+                            }
+
+                            if (snapshot.data == post['userId']) {
+                              return PopupMenuButton<String>(
+                                icon: Icon(Icons.more_vert),
+                                onSelected: (value) async {
+                                  if (value == 'delete') {
+                                    bool confirm = await showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return AlertDialog(
+                                          title: Text('Delete Post'),
+                                          content: Text('Are you sure you want to delete this post?'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.of(context).pop(false),
+                                              child: Text(
+                                                'Cancel',
+                                                style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.inversePrimary,
+                                                ),
+                                              ),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(context).pop(true);
+                                              },
+                                              child: Text(
+                                                'Delete',
+                                                style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.inversePrimary,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        );
+                                      },
+                                    );
+
+                                    if (confirm) {
+                                      try {
+                                        final firestore = FirebaseFirestore.instance;
+
+                                        final querySnapshot = await firestore
+                                            .collection('posts')
+                                            .where('postId', isEqualTo: post['postId'])
+                                            .where('userId', isEqualTo: post['userId'])
+                                            .get();
+
+                                        for (var doc in querySnapshot.docs) {
+                                          await doc.reference.delete();
+                                        }
+
+                                        print('Post deleted successfully');
+                                      } catch (e) {
+                                        print('Error deleting post: $e');
+                                      }
+                                    }
+
+                                  }
+                                },
+                                itemBuilder: (BuildContext context) => [
+                                  const PopupMenuItem<String>(
+                                    value: 'delete',
+                                    child: Text('Delete Post'),
+                                  ),
+                                ],
+                              );
+                            }
+
+                            return SizedBox.shrink();
+                          },
                         )
+
                       ],
                     );
                   },
@@ -666,7 +749,7 @@ class _CommentWidgetState extends State<CommentWidget> {
                               radius: 20,
                               backgroundImage: photoUrl.isNotEmpty
                                   ? MemoryImage(base64Decode(photoUrl))
-                                  : AssetImage('assets/images/profile_picture.png') as ImageProvider,
+                                  : NetworkImage('https://static.vecteezy.com/system/resources/previews/019/879/186/non_2x/user-icon-on-transparent-background-free-png.png'),
                             );
                           },
                         ),
@@ -694,29 +777,113 @@ class _CommentWidgetState extends State<CommentWidget> {
                                   children: [
                                     Row(
                                       children: [
+                                        Expanded(child:
                                         Text(
                                           username,
                                           style: const TextStyle(
                                             fontWeight: FontWeight.w600,
-                                            fontSize: 16,
+                                            fontSize: 14,
                                           ),
-                                        ),
+                                        )),
                                         const SizedBox(width: 8),
                                         Text(
                                           timeago.format(comment.createdAt),
                                           style: TextStyle(
-                                            fontSize: 14,
+                                            fontSize: 11,
                                             fontWeight: FontWeight.w400,
                                             color: Theme.of(context).colorScheme.onPrimary,
                                           ),
                                         ),
+
+                                        FutureBuilder<String?>(
+                                          future: storage.read(key: 'userId'),
+                                          builder: (BuildContext context, AsyncSnapshot<String?> snapshot) {
+                                            if (snapshot.connectionState == ConnectionState.waiting) {
+                                              return SizedBox.shrink();
+                                            }
+
+                                            if (snapshot.hasError || !snapshot.hasData) {
+                                              return SizedBox.shrink();
+                                            }
+
+                                            if (snapshot.data == userData?['userId']) {
+                                              return PopupMenuButton<String>(
+                                                icon: Icon(Icons.more_vert,size: 15,),
+                                                onSelected: (value) async {
+                                                  if (value == 'delete') {
+                                                    bool confirm = await showDialog(
+                                                      context: context,
+                                                      builder: (BuildContext context) {
+                                                        return AlertDialog(
+                                                          title: Text('Delete Comment'),
+                                                          content: Text('Are you sure you want to delete this comment?'),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () => Navigator.of(context).pop(false),
+                                                              child: Text(
+                                                                'Cancel',
+                                                                style: TextStyle(
+                                                                  color: Theme.of(context).colorScheme.inversePrimary,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            TextButton(
+                                                              onPressed: () {
+                                                                Navigator.of(context).pop(true);
+                                                              },
+                                                              child: Text(
+                                                                'Delete',
+                                                                style: TextStyle(
+                                                                  color: Theme.of(context).colorScheme.inversePrimary,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      },
+                                                    );
+
+                                                    if (confirm) {
+                                                      try {
+                                                        final firestore = FirebaseFirestore.instance;
+
+                                                        final querySnapshot = await firestore
+                                                            .collection('comments')
+                                                            .where('postId', isEqualTo: widget.postId)
+                                                            .where('userId', isEqualTo: userData?['userId'])
+                                                            .get();
+
+                                                        for (var doc in querySnapshot.docs) {
+                                                          await doc.reference.delete();
+                                                        }
+
+                                                        print('Post deleted successfully');
+                                                      } catch (e) {
+                                                        print('Error deleting post: $e');
+                                                      }
+                                                    }
+
+                                                  }
+                                                },
+                                                itemBuilder: (BuildContext context) => [
+                                                  const PopupMenuItem<String>(
+                                                    value: 'delete',
+                                                    child: Text('Delete Comment'),
+                                                  ),
+                                                ],
+                                              );
+                                            }
+
+                                            return SizedBox.shrink();
+                                          },
+                                        )
                                       ],
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 2),
                                     Text(
                                       comment.text,
                                       style: const TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         fontWeight: FontWeight.w400,
                                       ),
                                     ),
