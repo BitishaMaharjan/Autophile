@@ -1,3 +1,8 @@
+# Please USE THE below .env in the assets/.env
+NEWS_API_KEY=your-news-api-key
+Link to newsapi = https://newsapi.org/
+
+
 # Autophile
 
 **Autophile** is your ultimate car encyclopedia, designed as a comprehensive platform for car enthusiasts. The app provides detailed car specifications, 3D car models, camera-based car detection, and the latest car news while connecting car enthusiasts worldwide.
