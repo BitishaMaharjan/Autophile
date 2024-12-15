@@ -11,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:autophile/models/user_model.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:autophile/core/loading.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -26,7 +27,7 @@ class _SignupPageState extends State<SignupPage> {
   TextEditingController confirmPasswordController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   bool _isChecked=false;
-
+  bool isLoading = false;
   void sendOTP()async{
     EmailOTP.config(
       appName: 'Autophile',
@@ -46,6 +47,11 @@ class _SignupPageState extends State<SignupPage> {
 
 
   Future<void> signUp() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const LottieLoadingComponent(animationPath: 'assets/animation/loading.json'), // Show the Loading component
+    );
     if(!_isChecked){
       ToastUtils.showError('Please agree to user agreement to continue');
       return;
@@ -99,6 +105,8 @@ class _SignupPageState extends State<SignupPage> {
     } catch (e) {
       print("Error during signup: $e");
       ToastUtils.showError(e.toString());
+    }finally {
+      Navigator.pop(context);
     }
   }
 

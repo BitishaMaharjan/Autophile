@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:autophile/core/loading.dart';
 
 class Login_Page extends StatefulWidget {
   const Login_Page({super.key});
@@ -24,6 +25,7 @@ class _Login_PageState extends State<Login_Page> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final storage = FlutterSecureStorage();
+  bool isLoading = false;
 
   Future<void> loginWithGoogle() async {
     try {
@@ -84,6 +86,11 @@ class _Login_PageState extends State<Login_Page> {
   }
 
   Future<void> login()async{
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const LottieLoadingComponent(animationPath: 'assets/animation/loading.json'), // Show the Loading component
+    );
     try{
       var queryResult = await FirebaseFirestore.instance.collection('users').where('email',isEqualTo: emailController.text).get();
       if(queryResult.docs.isEmpty){
@@ -104,6 +111,8 @@ class _Login_PageState extends State<Login_Page> {
       }
     }catch(e){
       ToastUtils.showError(e.toString());
+    }finally {
+      Navigator.pop(context);
     }
   }
 
