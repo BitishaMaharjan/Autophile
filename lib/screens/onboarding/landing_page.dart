@@ -100,107 +100,111 @@ class _LandingPageState extends State<LandingPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
 
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/landing_background.png',
-              fit: BoxFit.contain,
-                color: Theme.of(context).colorScheme.surface
-            ),
-          ),
-
-          AnimatedPositioned(
-            duration: const Duration(seconds: 1),
-            curve: Curves.easeInOut,
-            top: _isLogoAtTop ? 50 : screenHeight / 3 - 50,
-            left: (screenWidth - 200) / 2+20,
-            child: SizedBox(
-              width: 200,
-              height: 250,
-              child: Image.asset(
-                'assets/images/logo.png',
-                fit: BoxFit.contain,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: Image.asset(
+                  'assets/images/landing_background.png',
+                  fit: BoxFit.contain,
+                    color: Theme.of(context).colorScheme.surface
+                ),
               ),
-            ),
-          ),
 
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(height: 300),
-                  AppButton(text: 'Sign in', onTap: (){Navigator.pushNamed(context, '/auth');}),
-                  SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Image.asset('assets/images/social_icons/Googlelogo.png' ,width: 20, fit: BoxFit.contain,),
-                          SizedBox(width: 40),
-                          Text(
-                            'Continue with Google'
-                          ),
-                        ],
-                      ),
-                    ),
+              AnimatedPositioned(
+                duration: const Duration(seconds: 1),
+                curve: Curves.easeInOut,
+                top: _isLogoAtTop ? 50 : screenHeight / 3 - 50,
+                left: (screenWidth - 200) / 2+20,
+                child: SizedBox(
+                  width: 200,
+                  height: 250,
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    fit: BoxFit.contain,
                   ),
-                  SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        children: [
-                          Image.asset('assets/images/social_icons/Facebook.png' ,width: 20, fit: BoxFit.contain,),
-                          SizedBox(width: 40),
-                          Text(
-                            'Continue with Facebook'
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height:100),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                ),
+              ),
+
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text("Don't have an account? ",
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary
-                        ),
-                      ),
+                      SizedBox(height: 300),
+                      AppButton(text: 'Sign in', onTap: (){Navigator.pushNamed(context, '/auth');}),
+                      SizedBox(height: 20),
                       GestureDetector(
-                        onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>SignupPage()));
-                        },
-                        child:
-                        Text('Sign up',
-                          style: TextStyle(
-                              color: Theme.of(context).colorScheme.secondary,
-                              fontWeight: FontWeight.bold
+                        onTap: loginWithGoogle,
+                        child: Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Image.asset('assets/images/social_icons/Googlelogo.png' ,width: 20, fit: BoxFit.contain,),
+                              SizedBox(width: 40),
+                              Text(
+                                'Continue with Google'
+                              ),
+                            ],
                           ),
                         ),
+                      ),
+                      SizedBox(height: 20),
+                      GestureDetector(
+                        onTap: () {},
+                        child: Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              Image.asset('assets/images/social_icons/Facebook.png' ,width: 20, fit: BoxFit.contain,),
+                              SizedBox(width: 40),
+                              Text(
+                                'Continue with Facebook'
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height:100),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text("Don't have an account? ",
+                            style: TextStyle(
+                                color: Theme.of(context).colorScheme.onPrimary
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: (){
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=>SignupPage()));
+                            },
+                            child:
+                            Text('Sign up',
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.secondary,
+                                  fontWeight: FontWeight.bold
+                              ),
+                            ),
+                          )
+                        ],
                       )
                     ],
-                  )
-                ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

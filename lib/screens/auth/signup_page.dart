@@ -11,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:autophile/models/user_model.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:autophile/core/loading.dart';
 
 const String userAgreementContent = '''
 Welcome to Autophile! Please read this User Agreement carefully before creating an account.
@@ -101,6 +102,7 @@ class _SignupPageState extends State<SignupPage> {
   TextEditingController confirmPasswordController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   bool _isChecked=false;
+  bool isLoading = false;
 
   void sendOTP()async{
     EmailOTP.config(
@@ -139,6 +141,11 @@ class _SignupPageState extends State<SignupPage> {
       ToastUtils.showError('Password must be at least 8 characters long');
       return;
     }
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const LottieLoadingComponent(animationPath: 'assets/animation/loading.json'), // Show the Loading component
+    );
 
     try {
       final checkEmail = await FirebaseFirestore.instance
@@ -174,11 +181,10 @@ class _SignupPageState extends State<SignupPage> {
     } catch (e) {
       print("Error during signup: $e");
       ToastUtils.showError(e.toString());
+    }finally {
+      Navigator.pop(context);
     }
   }
-
-
-
 
   final RegExp emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[cC][oO][mM]$');
   @override
@@ -306,52 +312,6 @@ class _SignupPageState extends State<SignupPage> {
                       ],
                     ),
                     SizedBox(height: 28,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: (){
-
-                          },
-                          child: Container(
-                            width: 108,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.rectangle,
-                              border: Border.all(color:Color(0xffD8DADC)),
-                              borderRadius: BorderRadius.circular(10),
-
-                            ),
-                            padding: EdgeInsets.all(15),
-                            child: Image.asset(
-                              'assets/images/social_icons/Facebook.png',
-                              height: 20,
-                              width: 20,
-
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 15,),
-                        GestureDetector(
-                          onTap: (){
-
-                          },
-                          child: Container(
-                            width: 108,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.rectangle,
-                              border: Border.all(color: Color(0xffD8DADC)),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: EdgeInsets.all(15),
-                            child: Image.asset(
-                              'assets/images/social_icons/Googlelogo.png',
-                              height: 20,
-                              width: 20,
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
                     SizedBox(height: 13,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -374,9 +334,10 @@ class _SignupPageState extends State<SignupPage> {
                               color:Theme.of(context).colorScheme.secondary,
                               fontWeight: FontWeight.w400,
                             ),),
-                        )
+                        ),
+
                       ],
-                    )
+                    ),
 
 
 

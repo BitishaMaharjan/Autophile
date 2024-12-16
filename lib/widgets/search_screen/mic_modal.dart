@@ -54,12 +54,7 @@ class _MicSearchModalState extends State<MicSearchModal> with SingleTickerProvid
 
   void performSearch() {
     if (speechText.isNotEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SearchResultsWidget(initialSearchQuery: speechText),
-        ),
-      );
+
     }
   }
 
