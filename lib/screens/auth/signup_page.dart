@@ -11,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:autophile/models/user_model.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:autophile/core/loading.dart';
 
 const String userAgreementContent = '''
 Welcome to Autophile! Please read this User Agreement carefully before creating an account.
@@ -101,6 +102,7 @@ class _SignupPageState extends State<SignupPage> {
   TextEditingController confirmPasswordController = TextEditingController();
   TextEditingController nameController = TextEditingController();
   bool _isChecked=false;
+  bool isLoading = false;
 
   void sendOTP()async{
     EmailOTP.config(
@@ -139,6 +141,11 @@ class _SignupPageState extends State<SignupPage> {
       ToastUtils.showError('Password must be at least 8 characters long');
       return;
     }
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const LottieLoadingComponent(animationPath: 'assets/animation/loading.json'), // Show the Loading component
+    );
 
     try {
       final checkEmail = await FirebaseFirestore.instance
@@ -174,11 +181,10 @@ class _SignupPageState extends State<SignupPage> {
     } catch (e) {
       print("Error during signup: $e");
       ToastUtils.showError(e.toString());
+    }finally {
+      Navigator.pop(context);
     }
   }
-
-
-
 
   final RegExp emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[cC][oO][mM]$');
   @override
