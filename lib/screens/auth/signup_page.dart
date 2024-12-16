@@ -306,52 +306,6 @@ class _SignupPageState extends State<SignupPage> {
                       ],
                     ),
                     SizedBox(height: 28,),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: (){
-
-                          },
-                          child: Container(
-                            width: 108,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.rectangle,
-                              border: Border.all(color:Color(0xffD8DADC)),
-                              borderRadius: BorderRadius.circular(10),
-
-                            ),
-                            padding: EdgeInsets.all(15),
-                            child: Image.asset(
-                              'assets/images/social_icons/Facebook.png',
-                              height: 20,
-                              width: 20,
-
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 15,),
-                        GestureDetector(
-                          onTap: (){
-
-                          },
-                          child: Container(
-                            width: 108,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.rectangle,
-                              border: Border.all(color: Color(0xffD8DADC)),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: EdgeInsets.all(15),
-                            child: Image.asset(
-                              'assets/images/social_icons/Googlelogo.png',
-                              height: 20,
-                              width: 20,
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
                     SizedBox(height: 13,),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -374,9 +328,10 @@ class _SignupPageState extends State<SignupPage> {
                               color:Theme.of(context).colorScheme.secondary,
                               fontWeight: FontWeight.w400,
                             ),),
-                        )
+                        ),
+
                       ],
-                    )
+                    ),
 
 
 
