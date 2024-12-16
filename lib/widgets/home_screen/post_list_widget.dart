@@ -636,6 +636,7 @@ class _PostListWidgetState extends State<PostListWidget> {
                       children: [
                         IconButton(
                         icon: Icon(Icons.chat_bubble_outline),
+                            color: Colors.grey,
                         onPressed: () {
                         showModalBottomSheet(
                         context: context,
