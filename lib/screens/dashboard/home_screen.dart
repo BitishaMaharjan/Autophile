@@ -32,6 +32,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String? selectedImage;
   bool isLoading = true;
+  bool _isLoadingTag = false;
+  bool _isUploadingImage = false;
+  bool _isCreatingPost = false;
 
   @override
   void dispose() {
@@ -83,8 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   Future<void> fetchPosts() async {
-    try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('posts').get();
+    FirebaseFirestore.instance.collection('posts').snapshots().listen((snapshot) {
       List<Map<String, dynamic>> fetchedPosts = snapshot.docs.map((doc) {
         return {
           'caption': doc['caption'] ?? '',
@@ -103,9 +105,9 @@ class _HomeScreenState extends State<HomeScreen> {
         posts = fetchedPosts;
         isLoading = false;
       });
-    } catch (error) {
-      print('Error fetching posts: $error');
-    }
+    }, onError: (error) {
+      print('Error listening to posts: $error');
+    });
   }
 
 
@@ -151,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _pickImage() async {
+  Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
@@ -171,8 +173,8 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _showAddTagDialog() {
-    showDialog(
+  Future<void> _showAddTagDialog() {
+   return showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -229,7 +231,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  bool isTagLoading = false;
+  bool isImageUploading = false;
+  bool isCreatingPost = false;
   void _showCreatePostPopup() {
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -254,6 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Handle Popup Header
                 Center(
                   child: Container(
                     width: 60,
@@ -318,9 +325,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     ActionChip(
-                      label: const Text("Add Tag"),
+                      label: isTagLoading
+                          ? CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.primary),
+                      )
+                          : const Text("Add Tag"),
                       avatar: Icon(Icons.add, color: Theme.of(context).colorScheme.primary),
-                      onPressed: _showAddTagDialog,
+                      onPressed: isTagLoading
+                          ? null
+                          : () async {
+                        setState(() => isTagLoading = true);
+                        await _showAddTagDialog();
+                        setState(() => isTagLoading = false);
+                      },
                       backgroundColor: Theme.of(context).colorScheme.secondary,
                       labelStyle: TextStyle(color: Theme.of(context).colorScheme.primary),
                     ),
@@ -338,7 +356,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 12),
                 GestureDetector(
-                  onTap: _pickImage,
+                  onTap: isImageUploading
+                      ? null
+                      : () async {
+                    setState(() => isImageUploading = true);
+                    await _pickImage();
+                    setState(() => isImageUploading = false);
+                  },
                   child: Center(
                     child: Container(
                       width: 120,
@@ -348,7 +372,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         border: Border.all(color: Theme.of(context).colorScheme.outline),
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: selectedImage != null
+                      child: isImageUploading
+                          ? Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.inversePrimary),
+                        ),
+                      )
+                          : selectedImage != null
                           ? ClipRRect(
                         borderRadius: BorderRadius.circular(20),
                         child: Image.file(
@@ -361,12 +391,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 30),
+
                 // Action Buttons
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     ElevatedButton.icon(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: isCreatingPost ? null : () => Navigator.pop(context),
                       label: const Text("Cancel"),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -376,10 +407,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(width: 10,),
+                    const SizedBox(width: 10),
                     ElevatedButton.icon(
-                      onPressed: _createPost,
-                      label: const Text("Post"),
+                      onPressed: isCreatingPost
+                          ? null
+                          : () async {
+                        setState(() => isCreatingPost = true);
+                        await _createPost();
+                        setState(() => isCreatingPost = false);
+                      },
+                      label: isCreatingPost
+                          ? CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.primary),
+                      )
+                          : const Text("Post"),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.tertiary,
                         foregroundColor: Theme.of(context).colorScheme.primary,
@@ -390,7 +432,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-
               ],
             ),
           ),
@@ -398,7 +439,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
 
 
   @override
