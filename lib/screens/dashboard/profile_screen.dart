@@ -1,13 +1,12 @@
+import 'dart:convert';  // Import this to decode Base64 strings
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:autophile/widgets/loading_skeleton.dart';
+import 'package:autophile/widgets/profile_header.dart';
 import 'package:autophile/models/user_model.dart';
 import 'package:autophile/widgets/home_screen/post_list_widget.dart';
-import 'package:autophile/widgets/profile_header.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-
-
-import 'package:autophile/widgets/saved_photos.dart';
-import 'package:autophile/widgets/loading_skeleton.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:async';
 
 class ProfileScreen extends StatefulWidget {
   final UserModel? user;
@@ -25,10 +24,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   List<Map<String, dynamic>> posts = [];
   bool isLoading = true;
 
+  StreamSubscription<QuerySnapshot>? _photosSubscription;
+  List<Map<String, dynamic>> savedPhotos = [];
+
+
+  // Function to decode base64 image and return as an Image
+  Image decodeBase64Image(String base64String) {
+    final bytes = base64Decode(base64String);
+    return Image.memory(bytes, fit: BoxFit.cover);
+  }
+
   Future<void> fetchPosts() async {
     final userId = await FlutterSecureStorage().read(key: 'userId');
     try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('posts').where('userId',isEqualTo: userId).get();
+      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('posts').where('userId', isEqualTo: userId).get();
       List<Map<String, dynamic>> fetchedPosts = snapshot.docs.map((doc) {
         return {
           'caption': doc['caption'] ?? '',
@@ -52,49 +61,68 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  final List<Map<String, String>> savedPhotos = [
-    {
-      'image': 'assets/images/savedcar1.png',
-      'name': 'Volkswagen Polo',
-    },
-    {
-      'image': 'assets/images/savedcar2.png',
-      'name': 'Tesla Model X',
-    },
-    {
-      'image': 'assets/images/savedcar3.png',
-      'name': 'Mercedes G-Wagon',
-    },
-    {
-      'image': 'assets/images/savedcar1.png',
-      'name': 'BMW X5',
-    },
-    {
-      'image': 'assets/images/savedcar2.png',
-      'name': 'BMW X5',
-    },
-    {
-      'image': 'assets/images/savedcar3.png',
-      'name': 'BMW X5',
-    },
-  ];
+  void fetchPhotos() async {
+    final userId = await FlutterSecureStorage().read(key: 'userId');
+    if (userId == null) return;
+
+    _photosSubscription = FirebaseFirestore.instance
+        .collection('classified_images')
+        .where('userId', isEqualTo: userId)
+        .snapshots()
+        .listen((snapshot) {
+      List<Map<String, dynamic>> fetchedPhotos = snapshot.docs.map((doc) {
+        return {
+          'docId': doc.id,
+          'label': doc['label'] ?? '',
+          'confidence': doc['confidence'] ?? '',
+          'image': doc['image'] ?? '',
+        };
+      }).toList();
+
+      setState(() {
+        savedPhotos = fetchedPhotos;
+        isLoading = false; // Stop showing the loading skeleton
+      });
+    }, onError: (error) {
+      print('Error listening to photos: $error');
+    });
+  }
+  Future<void> deletePhoto(String docId) async {
+    try {
+      // Delete the document from Firestore
+      await FirebaseFirestore.instance
+          .collection('classified_images')
+          .doc(docId)
+          .delete();
+
+      // Update the local state to remove the deleted photo
+      setState(() {
+        savedPhotos.removeWhere((photo) => photo['docId'] == docId);
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Photo deleted successfully!')),
+      );
+    } catch (error) {
+      print('Error deleting photo: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete photo.')),
+      );
+    }
+  }
+
 
   @override
   void initState() {
     super.initState();
     fetchPosts();
-    Future.delayed(Duration(seconds: 2), () {
-      setState(() {
-        isLoading = false; // Data has been loaded
-      });
-    });
+    fetchPhotos();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      // endDrawer: const AppDrawer(),
       body: SafeArea(
         child: Container(
           decoration: BoxDecoration(
@@ -165,17 +193,88 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 13), // Gap below the section
+                          const SizedBox(height: 13),
                           Divider(
                             color: Colors.grey.shade400,
                             thickness: 1,
                           ),
                           const SizedBox(height: 14),
                           isLoading
-                              ? LoadingSkeleton(isPost: true, isCarSearch: true) // Show loading indicator
-                              : PostListWidget(posts: posts)
+                              ? LoadingSkeleton(isPost: true, isCarSearch: true)
+                              : showMyPosts
+                              ? PostListWidget(posts: posts)
+                              : savedPhotos.isEmpty
+                              ? Center(child: Text('No saved photos available'))
+                              : GridView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                            ),
+                            itemCount: savedPhotos.length,
+                            itemBuilder: (context, index) {
+                              final photo = savedPhotos[index];
+                              final base64Image = photo['image'] ?? '';
+                              final decodedImage = decodeBase64Image(base64Image);
+
+                              return SizedBox(
+                                width: 250, // Adjust the width here
+                                height: 250, // Adjust the height here
+                                child: Card(
+                                  elevation: 4,
+                                  child: Stack(
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Flexible(child: decodedImage), // Ensure image scales properly
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                              photo['label'] ?? 'No Label',
+                                              style: TextStyle(fontWeight: FontWeight.bold),
+                                              overflow: TextOverflow.ellipsis, // Prevent text overflow
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                            child: Text(
+                                              'Confidence: ${photo['confidence'] ?? 'N/A'}',
+                                              style: TextStyle(
+                                                color: Colors.grey.shade600,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Positioned(
+                                        bottom: 25,
+                                        right: 8,
+                                        child: GestureDetector(
+                                          onTap: () async {
+                                            await deletePhoto(photo['docId']); // Pass the document ID
+                                          },
+                                          child: const Icon(
+                                            Icons.delete,
+                                            color: Colors.red,
+                                            size: 24,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+
+
+
                         ],
                       ),
+
                       Positioned(
                         top: 11,
                         right: 0,
