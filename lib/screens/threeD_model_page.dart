@@ -20,12 +20,12 @@ class _ThreedModelPageState extends State<ThreedModelPage> {
   Widget build(BuildContext context) {
     print(widget.car['assets']);
     final List<Map<String, String>> details = [
-      {'icon': '⛽', 'title': 'Range', 'value': widget.car['fuelTankCapacity'] ?? 'Unknown'},
+      {'icon': '⛽', 'title': 'Tank', 'value': widget.car['fuelTankCapacity'] ?? 'Unknown'},
       {'icon': '🚀', 'title': 'Power', 'value': widget.car['horsepower'] ?? 'Unknown'},
       {'icon': '💸', 'title': 'Price', 'value': widget.car['baseMsrp'] ?? 'Unknown'},
       {'icon': '⚙️', 'title': 'Year', 'value': widget.car['year'] ?? 'Unknown'},
       {'icon': '🔋', 'title': 'Engine', 'value': widget.car['engineSize'] ?? 'Unknown'},
-      {'icon': '🛞', 'title': 'Pistons', 'value': widget.car['cylinders'] ?? 'Unknown'},
+      {'icon': '🚗', 'title': 'Pistons', 'value': widget.car['cylinders'] ?? 'Unknown'},
     ];
     return Scaffold(
       appBar: AppBar(title: const Text('3D Model'),centerTitle: true,),
@@ -131,7 +131,8 @@ class _ThreedModelPageState extends State<ThreedModelPage> {
                   ),
                 );
               }).toList(),
-            )
+            ),
+            SizedBox(height: 30,)
 
           ],
         ),
