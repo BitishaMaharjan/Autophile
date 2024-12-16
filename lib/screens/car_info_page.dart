@@ -166,11 +166,15 @@ class _CarDetailsScreenState extends State<CarDetailsScreen> {
                         ),
                       ),
                       Center(
-                        child: Image.asset(
-                       widget.car['image'] ??  'assets/images/ferrari.png',
-                          fit: BoxFit.contain,
-                          width: constraints.maxWidth * 0.5,
-                          height: constraints.maxHeight * 0.6,
+                        child:
+                        Transform.rotate(
+                          angle: 3 * 3.14159 / 2,
+                          child: Image.network(
+                                                 widget.car['image'] ??  'https://www.pngarc.com/wp-content/uploads/2023/05/Sports-Car-Cartoon-Car-Compact-Car-car-vehicle-png-free-download.png',
+                            fit: BoxFit.contain,
+                            width: constraints.maxWidth * 0.5,
+                            height: constraints.maxHeight * 0.6,
+                          ),
                         ),
                       ),
 
